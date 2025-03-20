@@ -1,34 +1,47 @@
 # The codebase uses Gradle as the build tool.
 ## Gradle conventions
-- Always use Gradle wrapper.
 - Always use Kotlin DSL for Gradle scripts.
-- Always use Kotlin DSL to implement Gradle plugins.
+- Use pre-compiled script plugins as convention plugins. FYI, refer to https://docs.gradle.org/current/userguide/implementing_gradle_plugins_precompiled.html
+
 ## Codebase Structure
-The codebase is structured like a super project that contains multiple projects.
+The codebase is structured as a monorepo that contains multiple projects.
 Each specific project is placed in a top-level folder as a composite build, meaning it can be treated as an individual Gradle project.
 Within each composite build, there may be multiple Gradle subprojects.
 ```
-├── ikeyit-build-logic // composite build
+├── ikeyit-build-logic // composite build. Impliment convention plugins
 │   ...
 │   ├── settings.gradle.kts
 │   └── build.gradle.kts
-├── ikeyit-build-platform // composite build
+├── ikeyit-build-platform // composite build. Manage dependencies and align the versions
 │   ...
 │   ├── settings.gradle.kts
 │   └── build.gradle.kts
-├── ikeyit-common // composite build
+├── ikeyit-common // composite build. Define common utilities and supports
 │    ├── ...
-│    └── ikeyit-common-data // subproject
+│    └── ikeyit-common-data // subproject. Utilities for data access
 │    │    │   ...
 │    │    └── build.gradle.kts
-│    └── ikeyit-common-exception // subproject
+│    └── ikeyit-common-exception // subproject. Utilities for exception handling
 │    │    │   ...
 │    │    └── build.gradle.kts
 │    ├── settings.gradle.kts
 │    └── build.gradle.kts
-├── lib
-│   ...
-│   └── build.gradle.kts
+├── ikeyit-account // composite build. User management, identity provider, and SSO
+│    ├── ...
+│    └── ikeyit-account-domain // subproject. Domain layer for account service
+│    │    │   ...
+│    │    └── build.gradle.kts
+│    └── ikeyit-account-application // subproject. Applicaiton layer
+│    │    │   ...
+│    │    └── build.gradle.kts
+│    └── ikeyit-account-infrastructure // subproject. Infrastructure layer
+│    │    │   ...
+│    │    └── build.gradle.kts
+│    └── ikeyit-account-interfaces-api // subproject. Interface layer for rest api
+│    │    │   ...
+│    │    └── build.gradle.kts
+│    ├── settings.gradle.kts
+│    └── build.gradle.kts
 └── settings.gradle.kts
 ```
 Composite builds are usually developed independently, making them suitable for multiple teams to work on the same codebase. Another benefit is that if a composite build grows too large, it can be moved out and as a standalone repository. 
@@ -45,32 +58,19 @@ ikeyit-common-data and ikeyit-common-exception are its subprojects. They are inc
 include("ikeyit-common-data")
 include("ikeyit-common-exception")
 ```
-For more details, refer to https://docs.gradle.org/current/userguide/composite_builds.html
+FYI, refer to https://docs.gradle.org/current/userguide/composite_builds.html
 
 Special composite builds:
 ### ikeyit-build-logic
 Stores our own Gradle convention plugins for sharing build logic. 
-- build-java plugin. Defines java conventions, e.g. Java version, JUnit Test as test framework etc.
-- build-java-library plugin. 
-- build-spring-boot plugin. Defines spring boot conventions, e.g. Spring boot version, Spring boot starter parent etc.
+- build-java plugin. Defines the conventions for building java, e.g. Java version, JUnit Test as test framework etc.
+- build-java-library plugin. Apply the above build-java and define extra conventions for building java library.
+- build-spring-boot plugin. Apply the above build-java-library and define extra conventions for building spring boot applications.
 ### ikeyit-build-platform
 It's like BOM in the Maven world and ensures that all dependencies in a project align with a consistent set of versions.
 - ikeyit-java-platform is used to define the versions for all java-related dependencies.
 
-# Tech stack
-- Gradle 8.13+
-- Java 21+
-- Spring boot 3.4.3+
-- Spring Security 6.4.4+
-- Prefer using JdbcTemplate over JPA and Mybatis for database access
-- PostgreSQL 15+
-- Redis for distributed caching
-- Caffeine for in-memory caching
-- Spring Cloud Stream 4.2.0 for message-driven microservices
-- JUnit 5.12.1+ and Mockit 5.16.1+ for unit testing
-- Follow Domain Driven Design (DDD) principles
-
-# Code conventions
+# Code structure conventions
 - When a project or microservice is suitable for applying DDD, the project should use the following structure
 ```
 ├── ikeyit-foo // composite build
@@ -99,3 +99,4 @@ It's like BOM in the Maven world and ensures that all dependencies in a project 
 │    ├── settings.gradle.kts
 │    └── build.gradle.kts
 ```
+- java package name starts with com.ikeyit
