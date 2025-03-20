@@ -20,23 +20,24 @@
 ### 2.2 技术选型
 
 #### 前端技术栈
-- Web端：Next.js 14 + JavaScript + React + shadcn/ui, 实现SSR，优化SEO
+- Web端：Next.js 15.2.3、JavaScript、React 19、shadcn/ui、Vite 6.0.0, 实现SSR优化SEO
 - 移动端：iOS和Android应用 (React Native或原生开发)
 
 #### 后端技术栈
-- 核心框架：Spring Boot 3.4+、Spring Cloud、Spring Security + JWT认证
+- 语言：Java 21+
+- 核心框架：Spring Boot 3.4+、Spring Cloud 2024.0.1、Spring Security 6.4.4+、JWT
 - 数据访问：JdbcTemplate
 - 服务调用：gRPC（高性能场景）、OpenFeign（REST场景）
 - 消息队列：Kafka（Spring Cloud Stream 封装）
 - 数据库：PostgreSQL 15+
 - 缓存：Redis、Caffeine
 - 构建工具：Gradle 8.13+ (Monorepo,所有微服务放在同一个代码仓库)
-- 测试框架：JUnit 5.12+ and Mockit 5.16+
+- 测试框架：JUnit 5.12.1+ and Mockit 5.16.1+
 ### 2.3 微服务划分
 
 系统划分为以下微服务：
 
-1. **用户服务**：用户管理、认证授权
+1. **用户服务**：用户管理、认证授权、SSO
 2. **商户服务**：商户管理、店铺管理
 3. **商品服务**：商品管理、类目管理
 4. **订单服务**：订单管理、购物车
