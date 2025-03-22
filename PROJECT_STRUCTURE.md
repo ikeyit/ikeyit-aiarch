@@ -1,8 +1,9 @@
 # 本代码库使用Gradle作为构建工具。
 ## Gradle约定
 - 始终使用Kotlin DSL编写Gradle脚本。
-- 使用预编译脚本插件作为约定插件。参考：https://docs.gradle.org/current/userguide/implementing_gradle_plugins_precompiled.html
-- 使用Gradle Wrapper
+- 使用“预编译脚本插件”(Pre-compiled Script Plugins)作为约定插件。参考：https://docs.gradle.org/current/userguide/implementing_gradle_plugins_precompiled.html
+- 使用Gradle Wrapper来执行构建任务
+- 新建项目时version应设置为1.0.0-SNAPSHOT，group为com.ikeyit
 
 ## 代码库结构
 本代码库是一个包含多个项目的超级项目（Monorepo）。
@@ -65,15 +66,15 @@ include("ikeyit-common-exception")
 特殊的组合构建：
 ### ikeyit-build-logic
 存储我们自己的Gradle约定插件，用于共享构建逻辑。
-- build-java插件。定义构建Java的约定，例如Java版本、使用JUnit Test作为测试框架等。
+- build-java插件。定义构建Java的约定，例如设置Java版本为21、确保编译，测试，运行时编码使用UTF8，编译时使用-parameters参数，使用JUnit Test作为测试框架等。
 - build-java-library插件。应用上述build-java插件并定义构建Java库的额外约定。
 - build-spring-boot插件。应用上述build-java-library插件并定义构建Spring Boot应用的额外约定。
 ### ikeyit-build-platform
 类似于Maven世界中的BOM，确保项目中的所有依赖都使用一致的版本集。
 - ikeyit-java-platform用于定义所有Java相关依赖的版本。
 
-# 代码结构约定
-- 当项目或微服务适合应用DDD时，项目应使用以下结构
+# 实施DDD时的项目结构
+当项目适合应用DDD时，项目应使用以下结构
 ```
 ├── ikeyit-foo // 组合构建
 │    ├── ...
@@ -101,4 +102,3 @@ include("ikeyit-common-exception")
 │    ├── settings.gradle.kts
 │    └── build.gradle.kts
 ```
-- Java包名以com.ikeyit开头
