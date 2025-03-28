@@ -11,4 +11,3 @@ rootProject.name = "ikeyit-aiarch"
 includeBuild("ikeyit-build-logic")
 includeBuild("ikeyit-build-platform")
 includeBuild("ikeyit-common")
-includeBuild("ikeyit-demo")
