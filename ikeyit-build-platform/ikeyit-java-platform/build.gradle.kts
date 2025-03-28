@@ -20,26 +20,12 @@ dependencies {
     // Testing
     api(platform("org.junit:junit-bom:5.12.1"))
     api(platform("org.mockito:mockito-bom:5.16.1"))
-    
-    // Database
+
     constraints {
-        api("org.postgresql:postgresql:42.7.3")
-        
-        // Redis
-        api("org.redisson:redisson:3.28.1")
-        api("com.github.ben-manes.caffeine:caffeine:3.1.8")
-        
-        // Kafka
-        api("org.apache.kafka:kafka-clients:3.7.0")
-        
-        // gRPC
-        api("io.grpc:grpc-netty-shaded:1.64.0")
-        api("io.grpc:grpc-protobuf:1.64.0")
-        api("io.grpc:grpc-stub:1.64.0")
-        
-        // JWT
-        api("io.jsonwebtoken:jjwt-api:0.12.5")
-        api("io.jsonwebtoken:jjwt-impl:0.12.5")
-        api("io.jsonwebtoken:jjwt-jackson:0.12.5")
+        api("org.postgresql:postgresql:42.7.4")
+        api("com.google.guava:guava:31.1-jre")
+        api("org.apache.commons:commons-lang3:3.14.0")
+        api("javax.annotation:javax.annotation-api:1.3.2")
+        api("com.google.code.findbugs:jsr305:3.0.2")
     }
 }

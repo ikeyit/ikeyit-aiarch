@@ -1,11 +1,19 @@
 rootProject.name = "ikeyit-build-logic"
 
-dependencyResolutionManagement {
+pluginManagement {
+    // gradle plugin repositories.
     repositories {
         mavenCentral()
+        gradlePluginPortal()
     }
 }
 
-include("build-java-convention")
-include("build-java-library-convention")
-include("build-spring-boot-convention")
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+        // gradle plugin repositories for compiling plugins
+        gradlePluginPortal()
+    }
+}
+
+include("ikeyit-java-conventions")

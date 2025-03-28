@@ -1,10 +1,6 @@
-plugins {
-    `kotlin-dsl`
+tasks.register("clean") {
+    dependsOn(subprojects.map { it.tasks.named("clean") })
 }
-
-group = "com.ikeyit"
-version = "1.0.0-SNAPSHOT"
-
-dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
+tasks.register("build") {
+    dependsOn(subprojects.map { it.tasks.named("build") })
 }

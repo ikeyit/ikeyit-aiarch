@@ -1,5 +1,5 @@
 plugins {
-    id("build-java-library")
+    id("com.ikeyit.build-java-library")
 }
 
 dependencies {

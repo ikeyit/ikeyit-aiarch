@@ -1,3 +1,5 @@
+package com.ikeyit
+
 plugins {
     java
 }
@@ -35,6 +37,10 @@ dependencies {
     implementation(platform("com.ikeyit:ikeyit-java-platform"))
     
     // Testing
+    compileOnly("com.google.code.findbugs:jsr305")
+    testCompileOnly("com.google.code.findbugs:jsr305")
+    testImplementation("org.mockito:mockito-core")
+    testImplementation("org.mockito:mockito-junit-jupiter")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
