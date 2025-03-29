@@ -1,3 +1,10 @@
 rootProject.name = "ikeyit-common"
-include("ikeyit-common-data")
 include("ikeyit-common-exception")
+include("ikeyit-common-data")
+include("ikeyit-common-data-spring")
+include("ikeyit-common-spring-jdbc")
+include("ikeyit-common-web")
+include("ikeyit-common-grpc-server")
+include("ikeyit-common-grpc-client")
+include("ikeyit-common-storage")
+include("ikeyit-common-storage-s3")
