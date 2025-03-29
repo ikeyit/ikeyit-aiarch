@@ -1,10 +1,6 @@
 package com.ikeyit.common.data.spring.domain;
 
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
-
-import javax.sql.DataSource;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;

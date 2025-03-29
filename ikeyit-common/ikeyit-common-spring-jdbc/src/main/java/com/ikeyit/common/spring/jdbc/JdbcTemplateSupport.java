@@ -1,7 +1,6 @@
 package com.ikeyit.common.spring.jdbc;
 
 import com.ikeyit.common.data.domain.Entity;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;

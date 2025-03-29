@@ -2,8 +2,6 @@ package com.ikeyit.common.storage.s3;
 
 import com.ikeyit.common.storage.ObjectStorageService;
 import com.ikeyit.common.storage.PresignResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -11,11 +9,8 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
 import java.net.URI;
-import java.util.function.Supplier;
 
 public class S3ObjectStorageService implements ObjectStorageService {
-
-    private static final Logger log = LoggerFactory.getLogger(S3ObjectStorageService.class);
 
     private final S3ObjectStorageProperties s3ObjectStorageProperties;
 

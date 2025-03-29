@@ -62,8 +62,6 @@ public class JdbcDomainEventRepository implements DomainEventRepository {
     private final String sqlSave;
     private final String sqlDelete;
     private final String sqlFind;
-    private final String dialect;
-
     private final RowMapper<DomainEventPublication> rowMapper = (rs, rowNum) -> {
 //        UUID eventId = rs.getObject("event_id", UUID.class);
         String listenerId = rs.getString("listener_id");
@@ -85,7 +83,6 @@ public class JdbcDomainEventRepository implements DomainEventRepository {
 
     public JdbcDomainEventRepository(NamedParameterJdbcTemplate jdbcTemplate, String dialect, String tableName) {
         this.jdbcTemplate = jdbcTemplate;
-        this.dialect = dialect;
         switch (dialect) {
             case POSTGRESQL -> {
                 this.sqlSave = String.format(SQL_SAVE, tableName);
