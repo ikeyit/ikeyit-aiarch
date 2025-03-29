@@ -24,6 +24,18 @@ import java.util.Map;
 /**
  * Global error controller. When filter/internal errors occur, the controller will handle these error.
  */
+/**
+ * Global error controller that handles errors occurring in filters and internal processing.
+ * Extends Spring's AbstractErrorController to provide both HTML and JSON error responses.
+ * 
+ * This controller is responsible for handling various error scenarios including:
+ * - Not Found (404) errors
+ * - Forbidden (403) errors
+ * - Unauthorized (401) errors
+ * - Internal Server (500) errors
+ * 
+ * The response format (HTML or JSON) is determined by the request's Accept header.
+ */
 @Controller
 @RequestMapping("${server.error.path:${error.path:/error}}")
 public class RestErrorController extends AbstractErrorController {
@@ -39,6 +51,13 @@ public class RestErrorController extends AbstractErrorController {
 
     // HTML request
     @RequestMapping(produces = MediaType.TEXT_HTML_VALUE)
+    /**
+     * Handles error requests that accept HTML response.
+     * 
+     * @param request The HTTP request
+     * @param response The HTTP response
+     * @return A ResponseEntity containing an HTML error message
+     */
     public ResponseEntity<String> errorHtml(HttpServletRequest request, HttpServletResponse response) {
         HttpStatus status = getStatus(request);
         ErrorAttributeOptions options = ErrorAttributeOptions.defaults()
@@ -54,6 +73,13 @@ public class RestErrorController extends AbstractErrorController {
     }
 
     @RequestMapping
+    /**
+     * Handles error requests that accept JSON response.
+     * Provides detailed error information in a structured format.
+     * 
+     * @param request The HTTP request
+     * @return A ResponseEntity containing an ErrorResp object
+     */
     public ResponseEntity<ErrorResp> error(HttpServletRequest request) {
         HttpStatus status = getStatus(request);
         ErrorAttributeOptions options = ErrorAttributeOptions.defaults()
@@ -107,6 +133,12 @@ public class RestErrorController extends AbstractErrorController {
     }
 
     @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+    /**
+     * Handles requests with unsupported media types.
+     * 
+     * @param exception The HttpMediaTypeNotAcceptableException that was thrown
+     * @return A ResponseEntity containing an error response
+     */
     public ResponseEntity<ErrorResp> mediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException exception) {
         return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
                 .contentType(MediaType.APPLICATION_JSON)

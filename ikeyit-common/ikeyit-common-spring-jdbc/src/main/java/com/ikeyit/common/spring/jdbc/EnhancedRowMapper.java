@@ -26,8 +26,19 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Support embedded entity mapping.
- * @param <T>
+ * An enhanced implementation of Spring's RowMapper that supports mapping database rows to objects
+ * with embedded entities. This mapper provides advanced features such as constructor parameter mapping,
+ * embedded object handling, and custom column mapping.
+ *
+ * <p>Key features include:
+ * <ul>
+ * <li>Support for mapping to objects using constructor parameters</li>
+ * <li>Handling of embedded objects through @Embedded annotation</li>
+ * <li>Custom column mapping through ColumnMapper interface</li>
+ * <li>Automatic type conversion using ConversionService</li>
+ * </ul>
+ *
+ * @param <T> the type of object that this mapper will create
  */
 public class EnhancedRowMapper<T> implements RowMapper<T> {
 
@@ -61,15 +72,20 @@ public class EnhancedRowMapper<T> implements RowMapper<T> {
      * Create a new {@code SimplePropertyRowMapper}.
      * @param mappedClass the class that each row should be mapped to
      */
+    /**
+     * Creates a new EnhancedRowMapper using the default conversion service.
+     *
+     * @param mappedClass the class that each database row should be mapped to
+     */
     public EnhancedRowMapper(Class<T> mappedClass) {
         this(mappedClass, EnhancedConversionService.getInstance());
     }
 
     /**
-     * Create a new {@code SimplePropertyRowMapper}.
-     * @param mappedClass the class that each row should be mapped to
-     * @param conversionService a {@link ConversionService} for binding
-     * JDBC values to bean properties
+     * Creates a new EnhancedRowMapper with a custom conversion service.
+     *
+     * @param mappedClass the class that each database row should be mapped to
+     * @param conversionService the conversion service to use for type conversion
      */
     public EnhancedRowMapper(Class<T> mappedClass, ConversionService conversionService) {
         Assert.notNull(mappedClass, "Mapped Class must not be null");
@@ -146,6 +162,13 @@ public class EnhancedRowMapper<T> implements RowMapper<T> {
         embeddedMappers.put(embeddedMapper.name, embeddedMapper);
     }
 
+    /**
+     * Adds a custom column mapper for handling specific columns in a custom way.
+     *
+     * @param columnName the name of the database column
+     * @param columnMapper the custom mapper for handling this column
+     * @return this mapper instance for method chaining
+     */
     public EnhancedRowMapper<T> addColumnMapper(String columnName, ColumnMapper<T> columnMapper) {
         if (this.columnMappers == null) {
             this.columnMappers = new HashMap<>();
@@ -154,6 +177,16 @@ public class EnhancedRowMapper<T> implements RowMapper<T> {
         return this;
     }
 
+    /**
+     * Maps a row from the ResultSet to an object of type T.
+     * This implementation handles constructor parameters, embedded objects,
+     * and custom column mappings.
+     *
+     * @param rs the ResultSet to map (pre-initialized for the current row)
+     * @param rowNumber the number of the current row
+     * @return the mapped object
+     * @throws SQLException if a database access error occurs
+     */
     @SuppressWarnings("unchecked")
     @Override
     public T mapRow(ResultSet rs, int rowNumber) throws SQLException {

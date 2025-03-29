@@ -17,11 +17,21 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 
+/**
+ * An AOP advisor that manages the persistence of domain events in a transactional context.
+ * This advisor intercepts methods annotated with both @TransactionalEventListener and @PersistDomainEvent
+ * to ensure proper persistence and cleanup of domain events during transaction processing.
+ */
 public class PersistDomainEventAdvisor extends AbstractPointcutAdvisor {
     private static final Logger log = LoggerFactory.getLogger(PersistDomainEventAdvisor.class);
     private final DomainTransactionalEventListenerFactory domainTransactionalEventListenerFactory;
     private final Pointcut pointcut;
     private final Advice advice;
+    /**
+     * Constructs a new PersistDomainEventAdvisor.
+     *
+     * @param domainTransactionalEventListenerFactory The factory for creating transactional event listeners
+     */
     public PersistDomainEventAdvisor(DomainTransactionalEventListenerFactory domainTransactionalEventListenerFactory) {
         this.domainTransactionalEventListenerFactory = domainTransactionalEventListenerFactory;
         this.pointcut = new ComposablePointcut(new AnnotationMethodMatcher(TransactionalEventListener.class, true))
@@ -30,23 +40,50 @@ public class PersistDomainEventAdvisor extends AbstractPointcutAdvisor {
 
     }
 
+    /**
+     * Gets the pointcut that identifies methods to be intercepted.
+     *
+     * @return The pointcut targeting methods with both @TransactionalEventListener and @PersistDomainEvent annotations
+     */
     @Override
     public Pointcut getPointcut() {
         return pointcut;
     }
 
+    /**
+     * Gets the advice that handles the interception.
+     *
+     * @return The method interceptor advice
+     */
     @Override
     public Advice getAdvice() {
         return advice;
     }
 
+    /**
+     * Method interceptor that handles the persistence and cleanup of domain events.
+     * Implements Ordered to ensure highest precedence in the interceptor chain.
+     */
     class PersistMethodInterceptor implements MethodInterceptor, Ordered {
 
+        /**
+         * Defines the order of this interceptor in the interceptor chain.
+         *
+         * @return HIGHEST_PRECEDENCE to ensure this interceptor runs first
+         */
         @Override
         public int getOrder() {
             return Ordered.HIGHEST_PRECEDENCE;
         }
 
+        /**
+         * Intercepts method calls to handle domain event persistence and cleanup.
+         * Executes the intercepted method and manages the event lifecycle through the listener.
+         *
+         * @param invocation The method invocation being intercepted
+         * @return The result of the method invocation
+         * @throws Throwable If an error occurs during method invocation
+         */
         @Nullable
         @Override
         public Object invoke(@Nonnull MethodInvocation invocation) throws Throwable {

@@ -14,7 +14,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Manage the domain events, specially for failed events.
+ * A manager class responsible for handling domain events, with special focus on managing and retrying failed events.
+ * This class provides functionality to track, persist, and retry domain events that fail during processing,
+ * ensuring reliable event handling in distributed systems.
+ *
+ * The manager works with a DomainEventRepository to persist events and implements DomainEventRetryFilter
+ * to provide custom filtering logic during event retry operations.
  */
 public class DomainEventManager implements DomainEventRetryFilter {
 
@@ -24,12 +29,27 @@ public class DomainEventManager implements DomainEventRetryFilter {
     private final DomainEventRepository domainEventRepository;
     private final LinkedList<DomainEventRetryFilter> eventRetryFilters = new LinkedList<>();
 
+    /**
+     * Constructs a DomainEventManager with essential dependencies but no custom retry filters.
+     *
+     * @param domainTransactionalEventListenerFactory Factory for creating transactional event listeners
+     * @param platformTransactionManager Transaction manager for handling event processing
+     * @param domainEventRepository Repository for persisting domain events
+     */
     public DomainEventManager(DomainTransactionalEventListenerFactory domainTransactionalEventListenerFactory,
                               PlatformTransactionManager platformTransactionManager,
                               DomainEventRepository domainEventRepository) {
         this(domainTransactionalEventListenerFactory, platformTransactionManager, domainEventRepository, null);
     }
 
+    /**
+     * Constructs a DomainEventManager with all dependencies including custom retry filters.
+     *
+     * @param domainTransactionalEventListenerFactory Factory for creating transactional event listeners
+     * @param platformTransactionManager Transaction manager for handling event processing
+     * @param domainEventRepository Repository for persisting domain events
+     * @param eventRetryFilters List of filters to control event retry behavior
+     */
     public DomainEventManager(DomainTransactionalEventListenerFactory domainTransactionalEventListenerFactory,
                               PlatformTransactionManager platformTransactionManager,
                               DomainEventRepository domainEventRepository,
@@ -98,10 +118,25 @@ public class DomainEventManager implements DomainEventRetryFilter {
     }
 
 
+    /**
+     * Handles failures during event retry processing.
+     * This method can be overridden by subclasses to provide custom error handling.
+     *
+     * @param e The exception that occurred during processing
+     * @param domainEventPublication The event publication that failed
+     */
     protected void handleFailure(Exception e, DomainEventPublication domainEventPublication) {
         log.error("Fail to republish event.", e);
     }
 
+    /**
+     * Implements the DomainEventRetryFilter interface to process events during retry operations.
+     * This method processes the event and continues the filter chain.
+     *
+     * @param listener The listener that will process the event
+     * @param eventPublication The event publication to process
+     * @param filterChain The chain of filters to continue processing
+     */
     @Override
     public void doFilter(PersistTransactionalApplicationListener listener, DomainEventPublication eventPublication, DomainEventRetryFilterChain filterChain) {
         listener.processEvent(new PayloadApplicationEvent<>(this, eventPublication.getEvent()));

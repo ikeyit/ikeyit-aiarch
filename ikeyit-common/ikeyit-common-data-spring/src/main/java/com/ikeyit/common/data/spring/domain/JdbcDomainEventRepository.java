@@ -16,6 +16,11 @@ import java.util.UUID;
  * It's a jdbc version to store and read domain events.
  *
  */
+/**
+ * A JDBC implementation of the DomainEventRepository interface for storing and managing domain events.
+ * This implementation supports both PostgreSQL and MySQL databases, providing efficient storage and
+ * retrieval of domain events with proper transaction handling and concurrent processing support.
+ */
 public class JdbcDomainEventRepository implements DomainEventRepository {
 
     private static final String SQL_SAVE = """
@@ -77,10 +82,23 @@ public class JdbcDomainEventRepository implements DomainEventRepository {
         );
     };
 
+    /**
+     * Constructs a new JdbcDomainEventRepository with default PostgreSQL dialect and table name.
+     *
+     * @param jdbcTemplate The JDBC template for database operations
+     */
     public JdbcDomainEventRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         this(jdbcTemplate, POSTGRESQL, "domain_event");
     }
 
+    /**
+     * Constructs a new JdbcDomainEventRepository with specified dialect and table name.
+     *
+     * @param jdbcTemplate The JDBC template for database operations
+     * @param dialect The database dialect (PostgreSQL or MySQL)
+     * @param tableName The name of the table to store domain events
+     * @throws IllegalArgumentException if the specified dialect is not supported
+     */
     public JdbcDomainEventRepository(NamedParameterJdbcTemplate jdbcTemplate, String dialect, String tableName) {
         this.jdbcTemplate = jdbcTemplate;
         switch (dialect) {
@@ -99,6 +117,11 @@ public class JdbcDomainEventRepository implements DomainEventRepository {
 
     }
 
+    /**
+     * Saves a domain event publication to the database.
+     *
+     * @param domainEventPublication The domain event publication to save
+     */
     @Override
     public void save(DomainEventPublication domainEventPublication) {
         jdbcTemplate.update(sqlSave, new MapSqlParameterSource()
@@ -111,6 +134,12 @@ public class JdbcDomainEventRepository implements DomainEventRepository {
         );
     }
 
+    /**
+     * Deletes a domain event from the database.
+     *
+     * @param eventId The ID of the event to delete
+     * @param listenerId The ID of the listener that processed the event
+     */
     @Override
     public void delete(UUID eventId, String listenerId) {
         jdbcTemplate.update(sqlDelete, Map.of("eventId", eventId, "listenerId", listenerId));
@@ -123,6 +152,13 @@ public class JdbcDomainEventRepository implements DomainEventRepository {
      * @param maxCount
      * @return
      */
+    /**
+     * Finds domain events created before the specified time, using SKIP LOCK for concurrent processing.
+     *
+     * @param time The time threshold for selecting events
+     * @param maxCount The maximum number of events to return
+     * @return List of domain event publications
+     */
     @Override
     public List<DomainEventPublication> findBefore(Instant time, int maxCount) {
         return jdbcTemplate.query(sqlFind, Map.of(
@@ -131,18 +167,44 @@ public class JdbcDomainEventRepository implements DomainEventRepository {
         ), rowMapper);
     }
 
+    /**
+     * Serializes event headers to JSON format.
+     *
+     * @param headers The headers to serialize
+     * @return JSON string representation of the headers
+     */
     protected String serializeHeaders(Map<String, Object> headers) {
         return JsonUtils.writeValueAsString(headers);
     }
 
+    /**
+     * Deserializes JSON string to event headers.
+     *
+     * @param rawHeader The JSON string to deserialize
+     * @return Map of header key-value pairs
+     */
     protected Map<String, Object> deserializeHeaders(String rawHeader) {
         return JsonUtils.readValueAsMap(rawHeader);
     }
 
+    /**
+     * Serializes a domain event to JSON format.
+     *
+     * @param event The domain event to serialize
+     * @return JSON string representation of the event
+     */
     protected String serializeDomainEvent(DomainEvent event) {
         return JsonUtils.writeValueAsString(event);
     }
 
+    /**
+     * Deserializes JSON string to a domain event.
+     *
+     * @param payload The JSON string to deserialize
+     * @param eventType The class name of the event type
+     * @return The deserialized domain event
+     * @throws IllegalStateException if the event type class is not found
+     */
     protected DomainEvent deserializeDomainEvent(String payload, String eventType)  {
         try {
             return (DomainEvent) JsonUtils.readValue(payload, Class.forName(eventType));

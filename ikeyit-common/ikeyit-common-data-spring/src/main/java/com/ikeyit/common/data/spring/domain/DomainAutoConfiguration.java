@@ -7,6 +7,13 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.concurrent.Executor;
 
+/**
+ * Spring Boot auto-configuration class for domain-related components.
+ * This configuration is activated when an Executor bean is present in the application context.
+ * It is configured to run after TaskExecutionAutoConfiguration to ensure proper initialization order.
+ *
+ * Currently, this class serves as a placeholder for future domain-related auto-configuration.
+ */
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(TaskExecutionAutoConfiguration.class)
 @ConditionalOnBean(Executor.class)

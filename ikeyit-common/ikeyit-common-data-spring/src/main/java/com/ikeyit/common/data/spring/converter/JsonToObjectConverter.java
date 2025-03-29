@@ -15,18 +15,48 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * A Spring converter that handles conversion of JSON-formatted objects to their corresponding Java types.
+ * This converter supports conversion to various types including collections, maps, arrays, and custom objects
+ * that are annotated with @JsonField. It uses Jackson's ObjectMapper for JSON deserialization.
+ */
 public class JsonToObjectConverter implements ConditionalGenericConverter {
 
+    /**
+     * Specifies the source and target types this converter supports.
+     * This converter can handle conversion from any Object to any other Object type,
+     * with actual conversion determined by the matches method.
+     *
+     * @return A set containing the supported convertible type pair
+     */
     @Override
     public Set<ConvertiblePair> getConvertibleTypes() {
         return Collections.singleton(new ConvertiblePair(Object.class, Object.class));
     }
 
+    /**
+     * Determines if this converter can handle the conversion between the source and target types.
+     * Only matches if the target type is annotated with @JsonField.
+     *
+     * @param sourceType The type descriptor of the source type
+     * @param targetType The type descriptor of the target type
+     * @return true if conversion is supported, false otherwise
+     */
     @Override
     public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
         return targetType.getAnnotation(JsonField.class) != null;
     }
 
+    /**
+     * Converts a source object to the target type by treating it as JSON.
+     * Supports conversion to collections, maps, arrays, and custom objects.
+     *
+     * @param source The source object to convert
+     * @param sourceType The type descriptor of the source type
+     * @param targetType The type descriptor of the target type
+     * @return The converted object, or null if source is null
+     * @throws IllegalStateException if JSON deserialization fails
+     */
     @Override
     @Nullable
     @SuppressWarnings("all")

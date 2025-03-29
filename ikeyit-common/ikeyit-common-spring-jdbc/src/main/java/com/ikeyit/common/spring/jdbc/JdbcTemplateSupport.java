@@ -12,7 +12,22 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
 
+/**
+ * Utility class providing support methods for JDBC operations, particularly focused on
+ * handling generated keys and batch operations with Spring's JdbcTemplate.
+ */
 public class JdbcTemplateSupport {
+    /**
+     * Creates a new entity record and assigns the generated key to the entity.
+     * Uses 'id' as the default key column name.
+     *
+     * @param <ID> the type of entity identifier
+     * @param <A> the type of entity being created
+     * @param template the JDBC template to use for database operations
+     * @param sql the SQL insert statement
+     * @param entity the entity to insert
+     * @param sqlParameterSourceBuilder function to create SQL parameters from the entity
+     */
     public static <ID, A extends Entity<ID>> void createWithGeneratedKey(NamedParameterJdbcTemplate template,
                                                                        String sql,
                                                                        A entity,
@@ -20,6 +35,17 @@ public class JdbcTemplateSupport {
         createWithGeneratedKey(template, sql, entity, sqlParameterSourceBuilder, "id");
     }
 
+    /**
+     * Creates a new entity record and assigns the generated key to the entity using a specified key column.
+     *
+     * @param <ID> the type of entity identifier
+     * @param <A> the type of entity being created
+     * @param template the JDBC template to use for database operations
+     * @param sql the SQL insert statement
+     * @param entity the entity to insert
+     * @param sqlParameterSourceBuilder function to create SQL parameters from the entity
+     * @param keyColumn the name of the column containing the generated key
+     */
     public static <ID, A extends Entity<ID>> void createWithGeneratedKey(NamedParameterJdbcTemplate template,
                                                                        String sql,
                                                                        A entity,
@@ -45,6 +71,16 @@ public class JdbcTemplateSupport {
             throw new IllegalArgumentException("Unsupported entity type: " + entity.getClass().getName());
         }
     }
+    /**
+     * Performs a batch insert operation for multiple entities without key generation.
+     *
+     * @param <ID> the type of entity identifier
+     * @param <A> the type of entity being created
+     * @param template the JDBC template to use for database operations
+     * @param sql the SQL insert statement
+     * @param entities collection of entities to insert
+     * @param sqlParameterSourceBuilder function to create SQL parameters from entities
+     */
     public static <ID, A extends Entity<ID>> void batchCreate(NamedParameterJdbcTemplate template,
                                                                             String sql,
                                                                             Collection<A> entities,
@@ -55,6 +91,16 @@ public class JdbcTemplateSupport {
         template.batchUpdate(sql, parameters);
     }
 
+    /**
+     * Performs a batch insert operation with key generation using 'id' as the default key column.
+     *
+     * @param <ID> the type of entity identifier
+     * @param <A> the type of entity being created
+     * @param template the JDBC template to use for database operations
+     * @param sql the SQL insert statement
+     * @param entities collection of entities to insert
+     * @param sqlParameterSourceBuilder function to create SQL parameters from entities
+     */
     public static <ID, A extends Entity<ID>> void batchCreateWithGeneratedKey(NamedParameterJdbcTemplate template,
                                                                             String sql,
                                                                             Collection<A> entities,
@@ -62,6 +108,17 @@ public class JdbcTemplateSupport {
         batchCreateWithGeneratedKey(template, sql, entities, sqlParameterSourceBuilder, "id");
     }
 
+    /**
+     * Performs a batch insert operation with key generation using a specified key column.
+     *
+     * @param <ID> the type of entity identifier
+     * @param <A> the type of entity being created
+     * @param template the JDBC template to use for database operations
+     * @param sql the SQL insert statement
+     * @param entities collection of entities to insert
+     * @param sqlParameterSourceBuilder function to create SQL parameters from entities
+     * @param keyColumn the name of the column containing the generated key
+     */
     public static <ID, A extends Entity<ID>>  void batchCreateWithGeneratedKey(NamedParameterJdbcTemplate template,
                                                                             String sql,
                                                                             Collection<A> entities,
@@ -73,7 +130,16 @@ public class JdbcTemplateSupport {
         batchCreateWithGeneratedKey(template, sql, entities, parameters, keyColumn);
     }
 
-
+    /**
+     * Performs a batch insert operation with key generation using pre-built parameters and 'id' as the default key column.
+     *
+     * @param <ID> the type of entity identifier
+     * @param <A> the type of entity being created
+     * @param template the JDBC template to use for database operations
+     * @param sql the SQL insert statement
+     * @param entities collection of entities to insert
+     * @param parameters array of SQL parameters for the entities
+     */
     public static <ID, A extends Entity<ID>> void batchCreateWithGeneratedKey(NamedParameterJdbcTemplate template,
                                                                             String sql,
                                                                             Collection<A> entities,
@@ -81,6 +147,17 @@ public class JdbcTemplateSupport {
         batchCreateWithGeneratedKey(template, sql, entities, parameters, "id");
     }
 
+    /**
+     * Performs a batch insert operation with key generation using pre-built parameters and a specified key column.
+     *
+     * @param <ID> the type of entity identifier
+     * @param <A> the type of entity being created
+     * @param template the JDBC template to use for database operations
+     * @param sql the SQL insert statement
+     * @param entities collection of entities to insert
+     * @param parameters array of SQL parameters for the entities
+     * @param keyColumn the name of the column containing the generated key
+     */
     public static <ID, A extends Entity<ID>> void batchCreateWithGeneratedKey(NamedParameterJdbcTemplate template,
                                                                             String sql,
                                                                             Collection<A> entities,

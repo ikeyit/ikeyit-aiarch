@@ -7,19 +7,57 @@ import javax.annotation.Nonnull;
 import java.util.*;
 
 /**
- * A simple implementation to only save the changed parts of a list of entities.
- * The disadvantage is that the entities are updated even though they are not changed.
- * The better way is to use advanced ORM entity manager.
- * @param <A>
- * @param <ID>
+ * Interface for managing batch operations on collections of entities using JDBC.
+ * This implementation focuses on efficiency by only saving the changed parts of a list of entities.
+ * While simpler than a full ORM solution, it provides basic differential update capabilities.
+ * 
+ * Note: The current implementation updates entities even if they haven't changed.
+ * For more sophisticated change tracking, consider using an ORM entity manager.
+ *
+ * @param <A> the type of entity being managed
+ * @param <ID> the type of the entity's identifier
  */
 public interface JdbcDiffSaver <A extends Entity<ID>, ID>  {
+    /**
+     * Creates a SqlParameterSource for inserting a new entity.
+     *
+     * @param entity the entity to create parameters for
+     * @return SqlParameterSource containing the entity's insert parameters
+     */
     SqlParameterSource insertSqlParameterSource(A entity);
+
+    /**
+     * Creates a SqlParameterSource for updating an existing entity.
+     * By default, uses the same parameter source as insert operations.
+     *
+     * @param entity the entity to create parameters for
+     * @return SqlParameterSource containing the entity's update parameters
+     */
     default SqlParameterSource updateSqlParameterSource(A entity) {
         return insertSqlParameterSource(entity);
     }
+
+    /**
+     * Performs batch insert operations for new entities.
+     *
+     * @param insertEntities list of entities to insert
+     * @param sqlParameterSources corresponding SQL parameters for each entity
+     */
     void doInsert(List<A> insertEntities, List<SqlParameterSource> sqlParameterSources);
+
+    /**
+     * Performs batch update operations for existing entities.
+     *
+     * @param updateEntities list of entities to update
+     * @param sqlParameterSources corresponding SQL parameters for each entity
+     */
     void doUpdate(List<A> updateEntities, List<SqlParameterSource> sqlParameterSources);
+
+    /**
+     * Performs batch delete operations for entities by their IDs.
+     *
+     * @param ids set of entity IDs to delete
+     */
     void doDelete(Set<ID> ids);
 
     default void save(@Nonnull Collection<A> entities, @Nonnull Collection<ID> prevIds) {
