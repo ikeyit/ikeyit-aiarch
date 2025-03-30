@@ -1,0 +1,10 @@
+rootProject.name = "ikeyit-foo"
+include("ikeyit-foo-domain")
+include("ikeyit-foo-application")
+include("ikeyit-foo-infrastructure")
+include("ikeyit-foo-interfaces-allinone")
+include("ikeyit-foo-interfaces-api")
+include("ikeyit-foo-interfaces-grpc")
+include("ikeyit-foo-interfaces-consumer")
+include("ikeyit-foo-interfaces-job")
+include("ikeyit-foo-sdk")

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package grpc.ikeyit.foo.v1;
+
+option java_package = "com.ikeyit.foo.protobuf";
+option java_multiple_files = true;
+
+message Foo {
+  int64 id = 1;
+  string message = 2;
+}
+
+message GetAllFoosRequest {
+}
+
+message GetAllFoosResponse {
+  repeated Foo foos = 1;
+}
+
+service FooService {
+  rpc GetAllFoos(GetAllFoosRequest) returns (GetAllFoosResponse);
+}
