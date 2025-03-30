@@ -30,8 +30,7 @@ tasks.withType<Javadoc> {
 
 dependencies {
     implementation(platform("com.ikeyit:ikeyit-java-platform"))
-    
-    // Testing
+    implementation("org.slf4j:slf4j-api")
     compileOnly("com.google.code.findbugs:jsr305")
     testCompileOnly("com.google.code.findbugs:jsr305")
     testImplementation("org.mockito:mockito-core")
