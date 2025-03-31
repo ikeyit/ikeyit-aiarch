@@ -1,5 +1,8 @@
 package com.ikeyit.foo.application.model;
 
+/**
+ * Foo creation command.
+ */
 public class CreateFooCMD {
     private String message;
 

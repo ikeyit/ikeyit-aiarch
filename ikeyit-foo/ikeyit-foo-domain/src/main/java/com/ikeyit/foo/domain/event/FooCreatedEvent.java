@@ -6,7 +6,13 @@ import com.ikeyit.foo.domain.model.Foo;
 
 import java.time.Instant;
 
-
+/**
+ * Event triggered when a new foo is created.
+ * NOTE:
+ * Domain event should extend BaseDomainEvent
+ * Domain event should be immutable.
+ * Domain event should be POJO without setter, it can be serialized and deserialized as JSON
+ */
 public class FooCreatedEvent extends BaseDomainEvent {
     private Long id;
     private String message;

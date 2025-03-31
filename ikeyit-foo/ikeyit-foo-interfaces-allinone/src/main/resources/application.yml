@@ -1,3 +1,4 @@
+# Always use yaml file to define application properties
 server:
   shutdown: graceful
   servlet:

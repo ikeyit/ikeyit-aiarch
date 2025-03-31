@@ -1,5 +1,8 @@
 package com.ikeyit.foo.application.model;
 
+/**
+ * DTO for Foo.
+ */
 public class FooDTO {
     private Long id;
     private String message;

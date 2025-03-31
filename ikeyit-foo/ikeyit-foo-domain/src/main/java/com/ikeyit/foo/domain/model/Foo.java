@@ -9,13 +9,17 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 /**
+ * Foo domain model representing a foo in the system. It's an aggregate root.
+ * NOTE:
+ * Aggregate root should extend BaseAggregateRoot
  * Domain model should be rich model.
  * Define the concrete business methods to modify the model and keep data consistency.
- * Do not define the setters to directly update the inner models. It may destroy the data consistency.
+ * Do not define the setters to directly update the inner fields. It may destroy the data consistency.
  */
 public class Foo extends BaseAggregateRoot<Long> {
     private Long id;
     private String message;
+    private FooStatus status;
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -29,6 +33,7 @@ public class Foo extends BaseAggregateRoot<Long> {
 
     public Foo(String message) {
         this.message = message;
+        this.status = FooStatus.ACTIVE;
         this.createdAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
         this.updatedAt = createdAt;
         // Generate a domain event to notify the domain model is created
@@ -51,6 +56,10 @@ public class Foo extends BaseAggregateRoot<Long> {
 
     public String getMessage() {
         return message;
+    }
+
+    public FooStatus getStatus() {
+        return status;
     }
 
     @Override

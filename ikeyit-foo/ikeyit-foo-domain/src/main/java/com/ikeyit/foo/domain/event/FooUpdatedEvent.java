@@ -6,6 +6,9 @@ import com.ikeyit.foo.domain.model.Foo;
 
 import java.time.Instant;
 
+/**
+ * Event triggered when a foo is updated.
+ */
 public class FooUpdatedEvent extends BaseDomainEvent {
     private Long id;
     private String message;

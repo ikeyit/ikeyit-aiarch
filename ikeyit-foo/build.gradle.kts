@@ -1,3 +1,4 @@
+// Convenient for performing all tasks.
 tasks.register("clean") {
     dependsOn(subprojects.map { it.tasks.named("clean") })
 }

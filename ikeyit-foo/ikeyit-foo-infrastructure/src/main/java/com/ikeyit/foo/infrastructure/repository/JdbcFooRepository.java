@@ -18,7 +18,11 @@ import java.util.Optional;
 import static com.ikeyit.common.spring.jdbc.JdbcTemplateSupport.createWithGeneratedKey;
 
 /**
- * Use JdbcTemplate + utilities in com.ikeyit.common.spring.jdbc to implement the repository
+ * A jdbc implementation for FooRepository
+ * NOTE:
+ * Use NamedJdbcTemplate and utilities in com.ikeyit.common.spring.jdbc to implement the repository
+ * Use text block to store SQL
+ * Use @PublishDomainEvent to publish domain events when the model is saved to database
  */
 @Repository
 public abstract class JdbcFooRepository implements FooRepository {
@@ -49,6 +53,9 @@ public abstract class JdbcFooRepository implements FooRepository {
         """;
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
+    /**
+     * For simple cases, use EnhancedRowMapper to map record back to domain model
+     */
     private final RowMapper<Foo> rowMapper = new EnhancedRowMapper<>(Foo.class);
 
     public JdbcFooRepository(@Qualifier("fooJdbcTemplate")

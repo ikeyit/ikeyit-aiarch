@@ -11,6 +11,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 
+/**
+ * Configure datasource
+ */
 @Configuration(proxyBeanMethods = false)
 public class FooDatasourceConfig {
 
