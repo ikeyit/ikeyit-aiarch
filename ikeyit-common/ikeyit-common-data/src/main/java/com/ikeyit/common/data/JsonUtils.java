@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.MapType;
@@ -46,53 +45,18 @@ public class JsonUtils {
         SimpleModule extraModule = new SimpleModule();
         extraModule.addSerializer(BigDecimal.class, new BigDecimalSerializer());
         extraModule.addDeserializer(BigDecimal.class, new BigDecimalDeserializer());
-        extraModule.addSerializer(EnumWithInt.class, new EnumWithIntSerializer());
-        extraModule.setDeserializerModifier(new BeanDeserializerModifier(){
-            @Override
-            public JsonDeserializer<?> modifyEnumDeserializer(DeserializationConfig config, JavaType type, BeanDescription beanDesc, JsonDeserializer<?> deserializer) {
-                Class<?> rawClass = type.getRawClass();
-                if (EnumWithInt.class.isAssignableFrom(rawClass)) {
-                    return new EnumWithIntDeserializer(rawClass);
-                }
-                return super.modifyEnumDeserializer(config, type, beanDesc, deserializer);
-            }
-        });
+//        extraModule.addSerializer(EnumWithInt.class, new EnumWithIntSerializer());
+//        extraModule.setDeserializerModifier(new BeanDeserializerModifier(){
+//            @Override
+//            public JsonDeserializer<?> modifyEnumDeserializer(DeserializationConfig config, JavaType type, BeanDescription beanDesc, JsonDeserializer<?> deserializer) {
+//                Class<?> rawClass = type.getRawClass();
+//                if (EnumWithInt.class.isAssignableFrom(rawClass)) {
+//                    return new EnumWithIntDeserializer(rawClass);
+//                }
+//                return super.modifyEnumDeserializer(config, type, beanDesc, deserializer);
+//            }
+//        });
         return extraModule;
-    }
-
-    /**
-     * Custom serializer for EnumWithInt that writes the enum's integer value.
-     */
-    @SuppressWarnings("all")
-    private static class EnumWithIntSerializer extends JsonSerializer<EnumWithInt> {
-        @Override
-        public void serialize(EnumWithInt obj, JsonGenerator jsonGenerator, SerializerProvider serializers) throws IOException {
-            jsonGenerator.writeObject(obj.value());
-        }
-    }
-
-    /**
-     * Custom deserializer for EnumWithInt that creates enum instances from integer values.
-     */
-    @SuppressWarnings("all")
-    private static class EnumWithIntDeserializer extends JsonDeserializer<EnumWithInt> {
-        private Class<?> javaType;
-        public EnumWithIntDeserializer(Class<?> javaType) {
-            this.javaType = javaType;
-        }
-
-        @Override
-        public EnumWithInt deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException {
-            int val = jsonParser.getIntValue();
-
-            for (Object enumObj : javaType.getEnumConstants()) {
-                EnumWithInt enumWithInt = (EnumWithInt) enumObj;
-                if (val == enumWithInt.value()) {
-                    return enumWithInt;
-                }
-            }
-            throw new IOException(val + " can't be converted to " + javaType);
-        }
     }
 
     /**

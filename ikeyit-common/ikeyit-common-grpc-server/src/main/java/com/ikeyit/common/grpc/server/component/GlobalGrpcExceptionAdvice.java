@@ -19,7 +19,7 @@ public class GlobalGrpcExceptionAdvice {
     public StatusRuntimeException handleBizException(BizException e) {
         log.error("Failed to make a grpc call", e);
         Metadata metadata = new Metadata();
-        metadata.put(BIZ_ERROR_CODE_KEY, Integer.toString(e.getErrorCode().value()));
+        metadata.put(BIZ_ERROR_CODE_KEY, e.getErrorCode().name());
         return Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException(metadata);
     }
 

@@ -114,7 +114,7 @@ public class ErrorRespBuilder {
             String fullMessageKey = messageKeyPrefix != null ? messageKeyPrefix + messageKey : messageKey;
             message = messageSource.getMessage(fullMessageKey, args, defaultMessage, locale);
         }
-        return new ErrorResp(errorCode.value(), message);
+        return new ErrorResp(errorCode.name(), message);
     }
 
 
