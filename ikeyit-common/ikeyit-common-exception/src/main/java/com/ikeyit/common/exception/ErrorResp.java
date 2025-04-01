@@ -6,5 +6,5 @@ package com.ikeyit.common.exception;
  * @param errCode The numeric error code
  * @param errMsg The error message
  */
-public record ErrorResp(int errCode, String errMsg) {
+public record ErrorResp(String errCode, String errMsg) {
 }

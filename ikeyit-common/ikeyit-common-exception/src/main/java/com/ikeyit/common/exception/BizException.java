@@ -10,11 +10,11 @@ import java.util.Arrays;
  */
 public class BizException extends RuntimeException {
 
-    private ErrorCode errorCode;
+    private final ErrorCode errorCode;
 
-    private Object[] args;
+    private final Object[] args;
 
-    private MessageKey messageKey;
+    private final MessageKey messageKey;
 
     /**
      * Creates a new BizException with only an error code.
@@ -84,14 +84,6 @@ public class BizException extends RuntimeException {
      */
     public ErrorCode getErrorCode() {
         return errorCode;
-    }
-
-    /**
-     * Gets the numeric value of the error code.
-     * @return The error code value
-     */
-    public int getErrorCodeValue() {
-        return errorCode.value();
     }
 
     /**
