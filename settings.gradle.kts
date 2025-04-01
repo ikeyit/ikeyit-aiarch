@@ -7,8 +7,9 @@
 
 rootProject.name = "ikeyit-aiarch"
 
-// 包含组合构建
 includeBuild("ikeyit-build-logic")
 includeBuild("ikeyit-build-platform")
 includeBuild("ikeyit-common")
+includeBuild("ikeyit-security")
 includeBuild("ikeyit-foo")
+
