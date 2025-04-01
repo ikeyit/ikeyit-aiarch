@@ -1,0 +1,40 @@
+server:
+  shutdown: graceful
+  servlet:
+    encoding:
+      charset: utf-8
+      force: true
+      enabled: true
+    session:
+      timeout: 1d
+      cookie:
+        name: SID
+spring:
+  main:
+    banner-mode: off
+  application:
+    name: account-allinone
+  profiles:
+    active: dev
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  data:
+    redis:
+      host: redis-server
+      port: 6379
+# configure mq
+#  cloud:
+#    stream:
+#      kafka:
+#        binder:
+#          brokers: kafka-server:9092
+#          autoAddPartitions: true
+#          minPartitionCount: 2
+#      bindings:
+#        foo-out-0:
+#          destination: foo-created
+#        fooConsumeBigBang-in-0:
+#          destination: big-bang
+#          group: foo-big-bang
+#    function:
+#      definition: fooConsumeBigBang

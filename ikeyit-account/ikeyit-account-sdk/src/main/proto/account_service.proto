@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package grpc.ikeyit.account.v1;
+
+option java_package = "com.ikeyit.account.protobuf";
+option java_multiple_files = true;
+
+message GetUserRequest {
+  int64 id = 1;
+}
+
+message GetUserResponse {
+  int64 id = 1;
+  string username = 2;
+  string mobile = 3;
+  string email = 4;
+  string display_name = 5;
+  string avatar = 6;
+  int32 sex = 7;
+}
+
+service AccountService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+}

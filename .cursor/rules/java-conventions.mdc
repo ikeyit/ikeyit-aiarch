@@ -1,0 +1,48 @@
+---
+description: 
+globs: *.java
+alwaysApply: false
+---
+General Caveats
+- Write clean, efficient, and well-documented Java code
+- Use java 21 or later features to simplify the code
+- Replace explicit type declarations with var keyword where appropriate
+- Use SLF4J as the logger
+- Use [BizAssert.java](mdc:ikeyit-common/ikeyit-common-exception/src/main/java/com/ikeyit/common/exception/BizAssert.java) to validate business logic
+- The enumeration types used in the domain model should implement the EnumWithInt interface @EnumWithInt.java. Use the int value rather than string to store the enum.
+
+Naming Conventions
+- Use PascalCase for class names
+- Use camelCase for method and variable names
+- Use ALL_CAPS for constants
+- Name the application layer service as FooService. Not include the word "Application" in the name.
+- Name the domain layer service as FooDomainService.
+- Name query parameter object as FooQRY (e.g., UserQRY for user-related queries).
+- Name creation, update, or operation parameter object as FooCMD (e.g., CreateOrderCMD for creating an order).
+- Name the object returned by application layer service as FooDTO (e.g., UserDTO for returning user details).
+- Name the rest layer input and output objects as FooREQ and FooRESP if it's necessary
+
+Domain Driven Design
+
+Domain Model
+- Use rich model instead of anemic model
+- The aggregate root should extend com.ikeyit.common.data.domain.BaseAggregateRoot. Refer to the code @Foo.java
+- The domain event should extend com.ikeyit.common.data.domain.BaseDomainEvent. Refer to the code [FooCreatedEvent.java](mdc:ikeyit-foo/ikeyit-foo-domain/src/main/java/com/ikeyit/foo/domain/event/FooCreatedEvent.java)
+
+Repository
+- The repository interface should extend com.ikeyit.common.data.domain.CrudRepository
+- Prefer using NamedParameterJdbcTemplate + utilities in com.ikeyit.common.spring.jdbc to implement repositories
+- Prefer using text block to define SQL string
+- Prefer using PostgreSQL 15+ as the database 
+- Store database schema in the folder src/main/resources/db of the infrastructure project
+- Refer to the code [JdbcFooRepository.java](mdc:ikeyit-foo/ikeyit-foo-infrastructure/src/main/java/com/ikeyit/foo/infrastructure/repository/JdbcFooRepository.java)
+
+Application Layer
+- When a method of the service has more than two parameters, a parameter object should be used to encapsulate them for better readability and maintainability
+- Refer to the file [FooService.java](mdc:ikeyit-foo/ikeyit-foo-application/src/main/java/com/ikeyit/foo/application/service/FooService.java)
+
+Rest API layer
+- Make controllers as thin as possible
+- Use the application layer models as the input and output of the controllers, unless the data need be filtered or aggregated.
+- Data validation should be implemented in the application layer
+- Use spring security to protect api

@@ -1,0 +1,16 @@
+---
+description: Create or update a DDD-styled java project
+globs: 
+alwaysApply: false
+---
+Caveats
+- Create a new folder under the root to place new project 
+- The folder ikeyit-foo is boilerplate code for a new project
+- Refactor all "foo" symbols to the specified project name
+- IMPORTANT: Strictly follow the folder ikeyit-foo to layout the new folder structure and write the code
+- Set the project version to 1.0.0-SNAPSHOT and group to “com.ikeyit“ in gradle.properties
+- Add includeBuild in the root [settings.gradle.kts](mdc:settings.gradle.kts) 
+- Use gradle plugin "com.ikeyit.build-java-library" for library project
+- Use gradle plugin "com.ikeyit.build-spring-boot" for spring boot project
+- Use gradle plugin "com.ikeyit.build-grpc" for sdk project
+- Always use yaml to define spring application properties

@@ -1,0 +1,405 @@
+openapi: 3.0.3
+info:
+  title: ikeyit Account API
+  description: API for user account management, authentication, and profile operations
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local dev server
+
+tags:
+  - name: General
+    description: Operations related to general purpose
+  - name: Auth
+    description: Authentication and registration operations
+  - name: User
+    description: User profile management operations
+
+paths:
+  /auth/login:
+    post:
+      security:
+        - csrfToken: []
+      tags:
+        - Auth
+      summary: Authenticate user
+      description: Authenticates a user with the provided email or mobile number and password
+      operationId: authenticateUser
+      requestBody:
+        description: User authentication information
+        required: true
+        content:
+          form-urlencoded:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: Email or Mobile number
+                password:
+                  type: string
+                  format: password
+                  description: User password
+      responses:
+        '200':
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Fixed value "OK" to indicate the successful result
+                example: "OK"
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+  /api/session:
+    get:
+      tags:
+        - General
+      summary: Get current session information
+      description: Retrieves the current user session information including authentication status and CSRF token
+      operationId: getSession
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionVO'
+
+  /auth/signup:
+    post:
+      security:
+        - csrfToken: []
+      tags:
+        - Auth
+      summary: Register a new user
+      description: Handles new user registration and creates a new user account in the system
+      operationId: registerUser
+      requestBody:
+        description: User registration information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterUserCMD'
+      responses:
+        '200':
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDTO'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+
+  /api/user/profile:
+    get:
+      tags:
+        - User
+      summary: Get user profile
+      description: Retrieves the current user's profile information
+      operationId: getUser
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDTO'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+    patch:
+      tags:
+        - User
+      summary: Update user profile
+      description: Updates the current user's profile information
+      operationId: updateProfile
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      requestBody:
+        description: User profile update information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserProfileCMD'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDTO'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+
+  /api/user/locale:
+    patch:
+      tags:
+        - User
+      summary: Update user locale
+      description: Updates the user's locale preferences and sets the corresponding cookie
+      operationId: updateLocale
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      requestBody:
+        description: User locale update information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserLocaleCMD'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDTO'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+
+  /api/user/password:
+    post:
+      tags:
+        - User
+      summary: Update user password
+      description: Updates the user's password after validating the current password
+      operationId: updatePassword
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      requestBody:
+        description: Password update information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserPasswordCMD'
+      responses:
+        '200':
+          description: Password successfully updated
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    csrfToken:
+      type: apiKey
+      name: X-XSRF-TOKEN
+      in: header
+      description: CSRF token required for mutation operations
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: SID
+  schemas:
+    ErrorResp:
+      type: object
+      description: Standard error response structure
+      required:
+        - errCode
+        - errMsg
+      properties:
+        errCode:
+          type: string
+          description: Error code for program to read
+          example: "INVALID_ARGUMENT"
+        errMsg:
+          type: string
+          description: Error message describing the detail
+          example: "Name is required"
+
+    SessionVO:
+      type: object
+      properties:
+        csrfToken:
+          type: string
+          description: CSRF token for form submissions
+        user:
+          $ref: '#/components/schemas/UserVO'
+          description: Current authenticated user information
+
+    UserVO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: User ID
+        username:
+          type: string
+          description: Username
+        avatar:
+          type: string
+          description: URL to user's avatar image
+        displayName:
+          type: string
+          description: User's display name
+        authenticated:
+          type: boolean
+          description: Whether the user is authenticated
+
+    RegisterUserCMD:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+          format: password
+          description: User password
+        email:
+          type: string
+          format: email
+          description: User email address
+        mobile:
+          type: string
+          description: User mobile phone number
+        displayName:
+          type: string
+          description: User's display name
+        code:
+          type: string
+          description: Verification code
+
+    UserDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: User ID
+        username:
+          type: string
+          description: Username
+        mobile:
+          type: string
+          description: User mobile phone number
+        email:
+          type: string
+          format: email
+          description: User email address
+        displayName:
+          type: string
+          description: User's display name
+        avatar:
+          type: string
+          description: URL to user's avatar image
+        locale:
+          type: string
+          description: User's preferred locale
+        gender:
+          type: string
+          enum: [UNKNOWN, MALE, FEMALE, OTHER]
+          description: User's gender
+        location:
+          type: string
+          description: User's location
+        enabled:
+          type: boolean
+          description: Whether the user account is enabled
+        verified:
+          type: boolean
+          description: Whether the user account is verified
+
+    UpdateUserProfileCMD:
+      type: object
+      properties:
+        displayName:
+          type: string
+          description: User's display name
+        avatar:
+          type: string
+          description: URL to user's avatar image
+        gender:
+          type: string
+          enum: [UNKNOWN, MALE, FEMALE, OTHER]
+          description: User's gender
+        location:
+          type: string
+          description: User's location
+
+    UpdateUserLocaleCMD:
+      type: object
+      required:
+        - locale
+      properties:
+        locale:
+          type: string
+          description: User's preferred locale (e.g., en-US, zh-CN)
+
+    UpdateUserPasswordCMD:
+      type: object
+      required:
+        - password
+        - newPassword
+      properties:
+        password:
+          type: string
+          format: password
+          description: Current password
+        newPassword:
+          type: string
+          format: password
+          description: New password

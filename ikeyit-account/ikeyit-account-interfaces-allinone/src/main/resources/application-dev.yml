@@ -1,0 +1,20 @@
+logging:
+  level:
+    com.ikeyit: debug
+    org.springframework.security: debug
+spring:
+  config:
+    import: "optional:file:${user.home}/ikeyit-config/ikeyit-account/"
+  datasource:
+    account:
+      url: jdbc:postgresql://postgresql-server:5432/account?currentSchema=public&stringtype=unspecified
+      username: ikeyit
+      password: dev_pass
+      cp:
+        maximum-pool-size: 5
+        minimum-idle: 2
+        idle-timeout: 60000
+  data:
+    redis:
+      host: redis-server
+      port: 6379

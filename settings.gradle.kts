@@ -12,4 +12,4 @@ includeBuild("ikeyit-build-platform")
 includeBuild("ikeyit-common")
 includeBuild("ikeyit-security")
 includeBuild("ikeyit-foo")
-
+includeBuild("ikeyit-account")
