@@ -11,6 +11,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+/**
+ * Redis implementation of VerificationCodeRepository
+ */
 public class RedisVerificationCodeRepository implements VerificationCodeRepository {
 
     private final static Logger log = LoggerFactory.getLogger(RedisVerificationCodeRepository.class);
