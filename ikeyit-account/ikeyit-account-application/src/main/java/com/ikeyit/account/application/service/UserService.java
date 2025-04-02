@@ -69,30 +69,46 @@ public class UserService {
         return buildUserDTO(user);
     }
 
+    /**
+     * verify the email or mobile for signup
+     */
+    public VerifySignupResultDTO verifySignup(String username) {
+        BizAssert.notNull(username, "username must not be null");
+        if (username.contains("@")) {
+            BizAssert.isTrue(userRepository.findByEmail(username).isEmpty(), "email already exists");
+            signupEmailVerificationCodeService.sendCode(username);
+            return new VerifySignupResultDTO("A code has been sent to your email");
+        } else {
+            BizAssert.isTrue(userRepository.findByMobile(username).isEmpty(), "mobile already exists");
+            signupMobileVerificationCodeService.sendCode(username);
+            return new VerifySignupResultDTO("A code has been sent to your mobile");
+        }
+    }
+
     @Transactional(transactionManager = "accountTransactionManager")
-    public UserDTO registerUser(RegisterUserCMD registerUserCMD) {
-        BizAssert.notNull(registerUserCMD, "registerUserCMD must not be null");
-        BizAssert.isTrue(registerUserCMD.getEmail() != null || registerUserCMD.getMobile() != null,
+    public UserDTO signup(SignupCMD signupCMD) {
+        BizAssert.notNull(signupCMD, "signupCMD must not be null");
+        BizAssert.isTrue(signupCMD.getEmail() != null || signupCMD.getMobile() != null,
                 "Please specify either email or mobile");
         var userBuilder = User.newBuilder()
                 .username(generateUsername())
                 .locale(getCurrentLocale())
-                .displayName(registerUserCMD.getDisplayName());
+                .displayName(signupCMD.getDisplayName());
         // validate the password strength
-        passwordValidator.validate(registerUserCMD.getPassword());
-        userBuilder.password(passwordEncoder.encode(registerUserCMD.getPassword()));
-        if (registerUserCMD.getEmail() != null) {
+        passwordValidator.validate(signupCMD.getPassword());
+        userBuilder.password(passwordEncoder.encode(signupCMD.getPassword()));
+        if (signupCMD.getEmail() != null) {
             // validate the email
-            signupEmailVerificationCodeService.validate(registerUserCMD.getEmail(), registerUserCMD.getCode());
-            userRepository.findByEmail(registerUserCMD.getEmail())
+            signupEmailVerificationCodeService.validate(signupCMD.getEmail(), signupCMD.getCode());
+            userRepository.findByEmail(signupCMD.getEmail())
                     .ifPresent(BizAssert.failAction(CommonErrorCode.OCCUPIED, "The email is occupied!"));
-            userBuilder.email(registerUserCMD.getEmail());
+            userBuilder.email(signupCMD.getEmail());
         } else {
             // validate the mobile
-            signupMobileVerificationCodeService.validate(registerUserCMD.getMobile(), registerUserCMD.getCode());
-            userRepository.findByMobile(registerUserCMD.getMobile())
+            signupMobileVerificationCodeService.validate(signupCMD.getMobile(), signupCMD.getCode());
+            userRepository.findByMobile(signupCMD.getMobile())
                     .ifPresent(BizAssert.failAction(CommonErrorCode.OCCUPIED, "The mobile is occupied!"));
-            userBuilder.mobile(registerUserCMD.getMobile());
+            userBuilder.mobile(signupCMD.getMobile());
         }
         User user = userBuilder.build();
         userRepository.create(user);
@@ -100,7 +116,7 @@ public class UserService {
     }
 
     @Transactional(transactionManager = "accountTransactionManager")
-    public UserDTO registerUserWithMobileInstantly(String mobile) {
+    public UserDTO signupWithMobileInstantly(String mobile) {
         BizAssert.notNull(mobile, "mobile must not be null");
         userRepository.findByMobile(mobile)
                 .ifPresent(BizAssert.failAction(CommonErrorCode.OCCUPIED, "The mobile is occupied!"));
@@ -114,7 +130,7 @@ public class UserService {
     }
 
     @Transactional(transactionManager = "accountTransactionManager")
-    public UserDTO registerUserWithEmailInstantly(String email) {
+    public UserDTO signupWithEmailInstantly(String email) {
         BizAssert.notNull(email, "email must not be null");
         userRepository.findByEmail(email)
                 .ifPresent(BizAssert.failAction(CommonErrorCode.OCCUPIED, "The email is occupied!"));

@@ -26,6 +26,9 @@ import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.servlet.LocaleResolver;
 
+/**
+ * Basic security configuration, including api protection, password and verification authentication
+ */
 @Configuration
 @EnableWebSecurity
 public class AccountSecurityConfig {
@@ -187,7 +190,4 @@ public class AccountSecurityConfig {
             .exceptionHandling(c -> c.authenticationEntryPoint(authenticationEntryPoint));
         return http.build();
     }
-
-
-
 } 

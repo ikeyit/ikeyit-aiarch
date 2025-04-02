@@ -19,6 +19,7 @@ dependencies {
     api(platform("io.grpc:grpc-bom:1.63.0"))
     api(platform("software.amazon.awssdk:bom:2.29.9"))
     constraints {
+        api("org.springframework.security:spring-security-oauth2-authorization-server:1.4.2")
         api("org.postgresql:postgresql:42.7.4")
         api("com.google.guava:guava:31.1-jre")
         api("org.apache.commons:commons-lang3:3.14.0")

@@ -18,3 +18,56 @@ spring:
     redis:
       host: redis-server
       port: 6379
+  security:
+    oauth2:
+      authorizationserver:
+        issuer: https://auth.ikeyit.com
+        jwk-set-file: ${user.home}/ikeyit-config/ikeyit-account/JWK.json
+        id-token-time-to-live: 1d
+        client:
+          store-web-client:
+            registration:
+              client-id: store-web-client
+              client-secret: "{noop}store-web-client"
+              client-authentication-methods:
+                - client_secret_basic
+              authorization-grant-types:
+                - authorization_code
+                - refresh_token
+              redirect-uris:
+                - http://store.dev.local:6112/auth/oauth2/code/web-client
+              post-logout-redirect-uris:
+                - http://store.dev.local:6112
+              scopes:
+                - openid
+                - profile
+                - email
+                - role
+            token:
+              access-token-time-to-live: 60m
+              refresh-token-time-to-live: 360m
+              reuse-refresh-tokens: false
+            require-authorization-consent: false
+          admin-web-client:
+            registration:
+              client-id: admin-web-client
+              client-secret: "{noop}admin-web-client"
+              client-authentication-methods:
+                - client_secret_basic
+              authorization-grant-types:
+                - authorization_code
+                - refresh_token
+              redirect-uris:
+                - http://admin.dev.local:6113/auth/oauth2/code/web-client
+              post-logout-redirect-uris:
+                - http://admin.dev.local:6113
+              scopes:
+                - openid
+                - profile
+                - email
+                - role
+            token:
+              access-token-time-to-live: 60m
+              refresh-token-time-to-live: 360m
+              reuse-refresh-tokens: false
+            require-authorization-consent: false

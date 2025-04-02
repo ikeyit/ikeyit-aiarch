@@ -16,7 +16,11 @@ public class UploadController {
         this.objectStorageService = objectStorageService;
     }
 
-
+    /**
+     * Presigns a URL for file upload.
+     *
+     * @return Presigned URL for file upload
+     */
     @PostMapping("/api/presign-upload")
     public PresignResult presignUpload() {
         return objectStorageService.presign("misc/" + IdUtils.uuid());

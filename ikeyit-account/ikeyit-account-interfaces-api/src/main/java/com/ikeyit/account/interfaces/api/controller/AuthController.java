@@ -1,7 +1,8 @@
 package com.ikeyit.account.interfaces.api.controller;
 
-import com.ikeyit.account.application.model.RegisterUserCMD;
+import com.ikeyit.account.application.model.SignupCMD;
 import com.ikeyit.account.application.model.UserDTO;
+import com.ikeyit.account.application.model.VerifySignupResultDTO;
 import com.ikeyit.account.application.service.UserService;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,17 +22,15 @@ public class AuthController {
      * Handles new user registration and creates a new user account in the system.
      */
     @PostMapping("/auth/signup")
-    public UserDTO registerUser(@RequestBody RegisterUserCMD registerUserCMD) {
-        return userService.registerUser(registerUserCMD);
+    public UserDTO signup(@RequestBody SignupCMD signupCMD) {
+        return userService.signup(signupCMD);
     }
 
-    @PostMapping("/auth/send-email-code")
-    public void sendEmailCode(@RequestParam String email, @RequestParam String scenario) {
-
-    }
-
-    @PostMapping("/auth/send-mobile-code")
-    public void sendMobileCode(@RequestParam String mobile, @RequestParam String email) {
-
+    /**
+     * Verify the email or mobile for signup
+     */
+    @PostMapping("/auth/signup/verify")
+    public VerifySignupResultDTO verifySignup(@RequestParam String target) {
+        return userService.verifySignup(target);
     }
 }

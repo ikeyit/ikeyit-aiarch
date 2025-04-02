@@ -88,14 +88,14 @@ paths:
         - Auth
       summary: Register a new user
       description: Handles new user registration and creates a new user account in the system
-      operationId: registerUser
+      operationId: signup
       requestBody:
         description: User registration information
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegisterUserCMD'
+              $ref: '#/components/schemas/SignupCMD'
       responses:
         '200':
           description: User successfully registered
@@ -103,6 +103,125 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserDTO'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+                
+  /auth/signup/verify:
+    post:
+      security:
+        - csrfToken: []
+      tags:
+        - Auth
+      summary: Verify email or mobile for signup
+      description: Verifies the email or mobile number provided for user registration
+      operationId: verifySignup
+      parameters:
+        - name: target
+          in: query
+          description: Email or mobile number to verify
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Verification successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifySignupResultDTO'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+                
+  /auth/send-code:
+    post:
+      security:
+        - csrfToken: []
+      tags:
+        - Auth
+      summary: Send verification code
+      description: Sends a verification code to the specified email or mobile number for authentication
+      operationId: sendVerificationCode
+      requestBody:
+        description: Target information for sending verification code
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - target
+              properties:
+                target:
+                  type: string
+                  description: Email or mobile number to send verification code to
+      responses:
+        '200':
+          description: Verification code sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Success message
+                    example: "Verification code sent successfully"
+        '400':
+          description: Invalid input or rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+                
+  /auth/verify-code:
+    post:
+      security:
+        - csrfToken: []
+      tags:
+        - Auth
+      summary: Verify code for authentication
+      description: Authenticates a user with the provided email or mobile number and verification code
+      operationId: verifyCodeAuthentication
+      requestBody:
+        description: Verification code authentication information
+        required: true
+        content:
+          form-urlencoded:
+            schema:
+              type: object
+              required:
+                - target
+                - code
+              properties:
+                target:
+                  type: string
+                  description: Email or mobile number
+                code:
+                  type: string
+                  description: Verification code received
+      responses:
+        '200':
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Fixed value "OK" to indicate the successful result
+                example: "OK"
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
         '400':
           description: Invalid input
           content:
@@ -238,6 +357,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResp'
 
+  /api/presign-upload:
+    post:
+      tags:
+        - General
+      summary: Get presigned URL for file upload
+      description: Generates a presigned URL for secure file upload to object storage
+      operationId: presignUpload
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresignResult'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -300,7 +443,7 @@ components:
           type: boolean
           description: Whether the user is authenticated
 
-    RegisterUserCMD:
+    SignupCMD:
       type: object
       required:
         - password
@@ -403,3 +546,22 @@ components:
           type: string
           format: password
           description: New password
+          
+    VerifySignupResultDTO:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Verification result message
+          
+    PresignResult:
+      type: object
+      properties:
+        url:
+          type: string
+          description: The presigned URL for file upload
+        fields:
+          type: object
+          additionalProperties:
+            type: string
+          description: Additional fields required for the upload

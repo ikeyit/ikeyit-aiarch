@@ -18,10 +18,6 @@ spring:
     active: dev
   lifecycle:
     timeout-per-shutdown-phase: 30s
-  data:
-    redis:
-      host: redis-server
-      port: 6379
 # configure mq
 #  cloud:
 #    stream:

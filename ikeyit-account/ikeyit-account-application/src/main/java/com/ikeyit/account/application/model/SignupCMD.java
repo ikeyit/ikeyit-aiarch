@@ -3,7 +3,7 @@ package com.ikeyit.account.application.model;
 /**
  * Command for registering a new user
  */
-public class RegisterUserCMD {
+public class SignupCMD {
     private String password;
     private String email;
     private String mobile;
