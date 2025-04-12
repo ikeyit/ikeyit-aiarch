@@ -8,5 +8,6 @@ dependencies {
     api("com.ikeyit:ikeyit-common-storage")
     api("com.ikeyit:ikeyit-security-code-core")
     implementation("org.springframework:spring-context")
-    implementation("org.springframework.security:spring-security-core")
-} 
+    api("org.springframework.security:spring-security-crypto")
+    implementation("com.googlecode.libphonenumber:libphonenumber:8.13.32")
+}

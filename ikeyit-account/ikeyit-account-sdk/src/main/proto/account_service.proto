@@ -12,7 +12,7 @@ message GetUserRequest {
 message GetUserResponse {
   int64 id = 1;
   string username = 2;
-  string mobile = 3;
+  string phone = 3;
   string email = 4;
   string display_name = 5;
   string avatar = 6;

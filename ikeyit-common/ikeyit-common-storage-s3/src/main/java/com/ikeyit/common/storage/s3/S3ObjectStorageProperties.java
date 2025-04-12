@@ -1,10 +1,7 @@
 package com.ikeyit.common.storage.s3;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import java.time.Duration;
 
-@ConfigurationProperties("ikeyit.tenant.blobstore")
 public class S3ObjectStorageProperties {
     private String region;
     private String endpoint;

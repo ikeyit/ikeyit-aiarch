@@ -38,16 +38,19 @@ public class S3ObjectStorageService implements ObjectStorageService {
 
     @Override
     public String getObjectKey(String url) {
-        if (url == null)
-            return null;
+        if (url == null || url.isEmpty())
+            return "";
         URI uri = URI.create(url);
         return uri.getPath().substring(1);
     }
 
     @Override
     public String getCdnUrl(String url) {
-        if (url == null)
-            return null;
+        if (url == null || url.isEmpty())
+            return "";
+        // check if the url is absolute url
+        if (url.startsWith("http://") || url.startsWith("https://"))
+            return url;    
         return s3ObjectStorageProperties.getCdnUrl() + url;
     }
 

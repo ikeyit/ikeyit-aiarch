@@ -1,11 +1,11 @@
 package com.ikeyit.account.application.model;
 
 
-public class UpdateUserMobileCMD {
+public class UpdateUserPhoneCMD {
 
     private Long userId;
 
-    private String mobile;
+    private String phone;
 
     private String code;
 
@@ -17,12 +17,12 @@ public class UpdateUserMobileCMD {
         this.userId = userId;
     }
 
-    public String getMobile() {
-        return mobile;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setMobile(String mobile) {
-        this.mobile = mobile;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getCode() {

@@ -25,11 +25,11 @@ public class AccountVerificationCodeConfig {
     }
 
     @Bean
-    public VerificationCodeService loginMobileVerificationCodeService(StringRedisTemplate redisTemplate,
+    public VerificationCodeService loginPhoneVerificationCodeService(StringRedisTemplate redisTemplate,
                                                                       VerificationCodeGenerator verificationCodeGenerator) {
         return new DefaultVerificationCodeService(
-            new RedisVerificationCodeRepository(redisTemplate, "account:vc:login:mobile:"),
-            new ConsoleVerificationCodeSender("loginMobileVerificationCodeSender"),
+            new RedisVerificationCodeRepository(redisTemplate, "account:vc:login:phone:"),
+            new ConsoleVerificationCodeSender("loginPhoneVerificationCodeSender"),
             verificationCodeGenerator
         );
     }
@@ -45,11 +45,11 @@ public class AccountVerificationCodeConfig {
     }
 
     @Bean
-    public VerificationCodeService signupMobileVerificationCodeService(StringRedisTemplate redisTemplate,
+    public VerificationCodeService signupPhoneVerificationCodeService(StringRedisTemplate redisTemplate,
                                                                       VerificationCodeGenerator verificationCodeGenerator) {
         return new DefaultVerificationCodeService(
-            new RedisVerificationCodeRepository(redisTemplate, "account:vc:signup:mobile:"),
-            new ConsoleVerificationCodeSender("signupMobileVerificationCodeSender"),
+            new RedisVerificationCodeRepository(redisTemplate, "account:vc:signup:phone:"),
+            new ConsoleVerificationCodeSender("signupPhoneVerificationCodeSender"),
             verificationCodeGenerator
         );
     }
@@ -65,11 +65,11 @@ public class AccountVerificationCodeConfig {
     }
 
     @Bean
-    public VerificationCodeService updateMobileVerificationCodeService(StringRedisTemplate redisTemplate,
+    public VerificationCodeService updatePhoneVerificationCodeService(StringRedisTemplate redisTemplate,
                                                                        VerificationCodeGenerator verificationCodeGenerator) {
         return new DefaultVerificationCodeService(
-            new RedisVerificationCodeRepository(redisTemplate, "account:vc:update:mobile:"),
-            new ConsoleVerificationCodeSender("updateMobileVerificationCodeSender"),
+            new RedisVerificationCodeRepository(redisTemplate, "account:vc:update:phone:"),
+            new ConsoleVerificationCodeSender("updatePhoneVerificationCodeSender"),
             verificationCodeGenerator
         );
     }

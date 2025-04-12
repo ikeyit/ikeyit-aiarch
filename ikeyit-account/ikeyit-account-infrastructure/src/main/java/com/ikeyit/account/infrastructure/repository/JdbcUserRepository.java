@@ -24,14 +24,14 @@ import static com.ikeyit.common.spring.jdbc.JdbcTemplateSupport.createWithGenera
 public class JdbcUserRepository implements UserRepository {
     public static final String SQL_INSERT = """
             INSERT INTO user_info
-            (password,username,email,mobile,display_name,avatar,gender,location,enabled,verified,roles,locale)
+            (password,username,email,phone,display_name,avatar,gender,location,enabled,verified,roles,locale)
             VALUES
-            (:password,:username,:email,:mobile,:displayName,:avatar,:gender,:location,:enabled,:verified,:roles,:locale)
+            (:password,:username,:email,:phone,:displayName,:avatar,:gender,:location,:enabled,:verified,:roles,:locale)
             """;
     private static final String SQL_UPDATE = """
             UPDATE user_info SET
             password=:password,
-            mobile=:mobile,
+            phone=:phone,
             username=:username,
             email=:email,
             display_name=:displayName,
@@ -53,7 +53,7 @@ public class JdbcUserRepository implements UserRepository {
             SELECT * FROM user_info WHERE email = :email
             """;
     private static final String SQL_FIND_BY_MOBILE = """
-            SELECT * FROM user_info WHERE mobile = :mobile
+            SELECT * FROM user_info WHERE phone = :phone
             """;
 
     private static final String SQL_DELETE_BY_ID = """
@@ -104,7 +104,7 @@ public class JdbcUserRepository implements UserRepository {
     }
 
     @Override
-    public Optional<User> findByMobile(String mobile) {
-        return DataAccessUtils.optionalResult(jdbcTemplate.query(SQL_FIND_BY_MOBILE, Map.of("mobile", mobile), rowMapper));
+    public Optional<User> findByPhone(String phone) {
+        return DataAccessUtils.optionalResult(jdbcTemplate.query(SQL_FIND_BY_MOBILE, Map.of("phone", phone), rowMapper));
     }
 } 

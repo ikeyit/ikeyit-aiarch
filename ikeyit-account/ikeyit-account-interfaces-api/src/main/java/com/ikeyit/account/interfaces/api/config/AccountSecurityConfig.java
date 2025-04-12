@@ -1,27 +1,38 @@
 package com.ikeyit.account.interfaces.api.config;
 
-import com.ikeyit.account.infrastructure.security.LoginVerificationCodeService;
+import com.ikeyit.account.infrastructure.security.codeauth.CustomCodeAuthUserService;
+import com.ikeyit.account.infrastructure.security.codeauth.LoginVerificationCodeService;
+import com.ikeyit.account.infrastructure.security.oidc.CustomOidcUserService;
 import com.ikeyit.account.interfaces.api.auth.*;
-import com.ikeyit.security.codeauth.core.CodeAuthUserService;
+import com.ikeyit.account.interfaces.api.auth.oidc.PopupOidcAuthenticationSuccessHandler;
 import com.ikeyit.security.codeauth.web.VerificationCodeAuthenticationConfigurer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.servlet.LocaleResolver;
@@ -29,7 +40,7 @@ import org.springframework.web.servlet.LocaleResolver;
 /**
  * Basic security configuration, including api protection, password and verification authentication
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
 public class AccountSecurityConfig {
     private final static MediaTypeRequestMatcher JSON_REQUEST_MATCHER = new MediaTypeRequestMatcher(MediaType.APPLICATION_JSON);
@@ -125,11 +136,17 @@ public class AccountSecurityConfig {
                                                                  AuthenticationEntryPoint authenticationEntryPoint,
                                                                  AuthenticationSuccessHandler authenticationSuccessHandler,
                                                                  AuthenticationFailureHandler authenticationFailureHandler,
-                                                                 CodeAuthUserService codeAuthUserService,
-                                                                 LoginVerificationCodeService loginVerificationCodeService) throws Exception {
+                                                                 CustomCodeAuthUserService codeAuthUserService,
+                                                                 LoginVerificationCodeService loginVerificationCodeService,
+                                                                 @Autowired(required = false)
+                                                                 ClientRegistrationRepository clientRegistrationRepository,
+                                                                 CustomOidcUserService oidcUserService,
+                                                                 @Autowired(required = false)
+                                                                 RememberMeServices rememberMeServices
+                                                                 ) throws Exception {
         http.securityMatcher("/auth/**")
             .authorizeHttpRequests((authorize) -> authorize
-                .requestMatchers("/auth/signup")
+                .requestMatchers("/auth/signup/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
@@ -142,6 +159,7 @@ public class AccountSecurityConfig {
                 .successHandler(authenticationSuccessHandler)
                 .failureHandler(authenticationFailureHandler)
             )
+            .logout(c -> c.logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout", HttpMethod.GET.name())))
             .with(new VerificationCodeAuthenticationConfigurer<>(), c -> c
                 .sendCodeUrl("/auth/send-code")
                 .loginUrl("/auth/verify-code")
@@ -159,6 +177,17 @@ public class AccountSecurityConfig {
             // Disable remember me.
             .rememberMe(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable);
+        if (rememberMeServices != null) {
+            http.rememberMe(c -> c.rememberMeServices(rememberMeServices));
+        }
+        if (clientRegistrationRepository != null) {
+            http.oauth2Login(c -> c
+                .successHandler(new PopupOidcAuthenticationSuccessHandler())
+                .userInfoEndpoint(user -> user.oidcUserService(oidcUserService))
+                .loginProcessingUrl("/auth/oauth2/code/*")
+                .authorizationEndpoint(a -> a.baseUri("/auth/authorization"))
+            );
+        }
         return http.build();
     }
 
@@ -174,7 +203,7 @@ public class AccountSecurityConfig {
         http
             .securityMatcher("/api/**")
             .authorizeHttpRequests(c -> c
-                    .requestMatchers("/api/session")
+                    .requestMatchers("/api/session", "/api/oidc-providers")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
@@ -190,4 +219,15 @@ public class AccountSecurityConfig {
             .exceptionHandling(c -> c.authenticationEntryPoint(authenticationEntryPoint));
         return http.build();
     }
+
+    @Bean
+    public AuthenticationManager authenticationManager(
+        UserDetailsService userDetailsService,
+        PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
+        return new ProviderManager(authenticationProvider);
+    }
+
 } 

@@ -9,7 +9,7 @@ public class BaseUserEvent extends BaseDomainEvent {
     private Long userId;
     private String username;
     private String email;
-    private String mobile;
+    private String phone;
     private String displayName;
     private String location;
     private String avatar;
@@ -26,7 +26,7 @@ public class BaseUserEvent extends BaseDomainEvent {
         this.userId = user.getId();
         this.username = user.getUsername();
         this.email = user.getEmail();
-        this.mobile = user.getMobile();
+        this.phone = user.getPhone();
         this.locale = user.getLocale();
         this.displayName = user.getDisplayName();
         this.avatar = user.getAvatar();
@@ -68,8 +68,8 @@ public class BaseUserEvent extends BaseDomainEvent {
         return email;
     }
 
-    public String getMobile() {
-        return mobile;
+    public String getPhone() {
+        return phone;
     }
 
     public boolean isEnabled() {

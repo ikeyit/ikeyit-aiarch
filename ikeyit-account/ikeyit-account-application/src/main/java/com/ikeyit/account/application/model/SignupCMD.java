@@ -5,8 +5,7 @@ package com.ikeyit.account.application.model;
  */
 public class SignupCMD {
     private String password;
-    private String email;
-    private String mobile;
+    private String username;
     private String displayName;
     private String code;
     public String getPassword() {
@@ -17,20 +16,12 @@ public class SignupCMD {
         this.password = password;
     }
 
-    public String getEmail() {
-        return email;
+    public String getUsername() {
+        return username;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getMobile() {
-        return mobile;
-    }
-
-    public void setMobile(String mobile) {
-        this.mobile = mobile;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getDisplayName() {

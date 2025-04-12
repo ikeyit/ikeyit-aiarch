@@ -1,4 +1,4 @@
-package com.ikeyit.account.interfaces.api.auth.oauth2;
+package com.ikeyit.account.interfaces.api.auth.authorization;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsent;

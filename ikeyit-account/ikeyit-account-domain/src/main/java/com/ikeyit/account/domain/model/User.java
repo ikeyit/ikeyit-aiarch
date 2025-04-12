@@ -18,7 +18,7 @@ public class User extends BaseAggregateRoot<Long> {
     private Long id;
     private String username;
     private String password;
-    private String mobile;
+    private String phone;
     private String email;
     private String displayName;
     private String avatar;
@@ -43,7 +43,7 @@ public class User extends BaseAggregateRoot<Long> {
     private User(Builder builder) {
         username = builder.username;
         password = builder.password;
-        mobile = builder.mobile;
+        phone = builder.phone;
         email = builder.email;
         displayName = builder.displayName;
         avatar = builder.avatar;
@@ -129,19 +129,19 @@ public class User extends BaseAggregateRoot<Long> {
     }
 
     /**
-     * Updates the user's mobile number
-     * @param mobile The new mobile number
-     * @throws IllegalArgumentException if mobile is null
+     * Updates the user's phone number
+     * @param phone The new phone number
+     * @throws IllegalArgumentException if phone is null
      */
-    public void updateMobile(String mobile) {
-        BizAssert.notNull(mobile, "Mobile cannot be null");
-        if (Objects.equals(mobile, this.mobile)) {
+    public void updatePhone(String phone) {
+        BizAssert.notNull(phone, "Phone cannot be null");
+        if (Objects.equals(phone, this.phone)) {
             return;
         }
-        var previousMobile = this.mobile;
-        this.mobile = mobile;
+        var previousPhone = this.phone;
+        this.phone = phone;
         this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
-        addDomainEvent(new UserMobileUpdatedEvent(this, previousMobile));
+        addDomainEvent(new UserPhoneUpdatedEvent(this, previousPhone));
     }
 
     /**
@@ -231,11 +231,11 @@ public class User extends BaseAggregateRoot<Long> {
     }
 
     /**
-     * Gets the mobile number
-     * @return The mobile number
+     * Gets the phone number
+     * @return The phone number
      */
-    public String getMobile() {
-        return mobile;
+    public String getPhone() {
+        return phone;
     }
 
     /**
@@ -332,7 +332,7 @@ public class User extends BaseAggregateRoot<Long> {
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
-                ", mobile='" + mobile + '\'' +
+                ", phone='" + phone + '\'' +
                 ", displayName='" + displayName + '\'' +
                 ", enabled=" + enabled +
                 ", verified=" + verified +
@@ -344,10 +344,10 @@ public class User extends BaseAggregateRoot<Long> {
 
     public static final class Builder {
         private String username;
-        private String password;
-        private String mobile;
+        private String password = "";
+        private String phone;
         private String email;
-        private String displayName;
+        private String displayName = "";
         private String avatar = "";
         private Gender gender = Gender.UNKNOWN;;
         private String location = "";
@@ -371,8 +371,8 @@ public class User extends BaseAggregateRoot<Long> {
             return this;
         }
 
-        public Builder mobile(String val) {
-            mobile = val;
+        public Builder phone(String val) {
+            phone = val;
             return this;
         }
 
@@ -382,8 +382,7 @@ public class User extends BaseAggregateRoot<Long> {
         }
 
         public Builder displayName(String val) {
-            BizAssert.notNull(val, "displayName must not be null");
-            BizAssert.isTrue(val.length() > 2, "displayName should have at least three characters");
+            BizAssert.hasLength(val, "displayName must not be empty");
             displayName = val;
             return this;
         }

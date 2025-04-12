@@ -1,9 +1,6 @@
 package com.ikeyit.account.interfaces.api.controller;
 
-import com.ikeyit.account.application.model.UpdateUserLocaleCMD;
-import com.ikeyit.account.application.model.UpdateUserPasswordCMD;
-import com.ikeyit.account.application.model.UpdateUserProfileCMD;
-import com.ikeyit.account.application.model.UserDTO;
+import com.ikeyit.account.application.model.*;
 import com.ikeyit.account.application.service.UserService;
 import com.ikeyit.account.infrastructure.security.UserPrincipal;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,7 +31,7 @@ public class UserController {
     /**
      * Updates the current user's profile information.
      */
-    @PatchMapping("/profile")
+    @PostMapping("/profile")
     public UserDTO updateProfile(@RequestBody UpdateUserProfileCMD updateUserProfileCMD,
                               @AuthenticationPrincipal UserPrincipal principal) {
         updateUserProfileCMD.setUserId(principal.getId());
@@ -44,7 +41,7 @@ public class UserController {
     /**
      * Updates the user's locale preferences and sets the corresponding cookie.
      */
-    @PatchMapping("/locale")
+    @PostMapping("/locale")
     public UserDTO updateLocale(@RequestBody UpdateUserLocaleCMD updateUserLocaleCMD,
                               @AuthenticationPrincipal UserPrincipal principal,
                               HttpServletRequest request,
@@ -68,4 +65,31 @@ public class UserController {
         userService.updatePassword(updateUserPasswordCMD);
     }
 
+    @PostMapping("/email/verification")
+    public void sendVerificationCodeForUpdateEmail(@RequestBody SendEmailVerificationCodeCMD sendEmailVerificationCodeCMD,
+                                                   @AuthenticationPrincipal UserPrincipal principal) {
+        sendEmailVerificationCodeCMD.setUserId(principal.getId());
+        userService.sendVerificationCodeForUpdateEmail(sendEmailVerificationCodeCMD);
+    }
+
+    @PostMapping("/phone/verification")
+    public void sendVerificationCodeForUpdatePhone(@RequestBody SendPhoneVerificationCodeCMD sendPhoneVerificationCodeCMD,
+                                                    @AuthenticationPrincipal UserPrincipal principal) {
+        sendPhoneVerificationCodeCMD.setUserId(principal.getId());
+        userService.sendVerificationCodeForUpdatePhone(sendPhoneVerificationCodeCMD);
+    }
+
+    @PostMapping("/email")
+    public void updateEmail(@RequestBody UpdateUserEmailCMD updateUserEmailCMD,
+                            @AuthenticationPrincipal UserPrincipal principal) {
+        updateUserEmailCMD.setUserId(principal.getId());
+        userService.updateUserEmail(updateUserEmailCMD);
+    }
+    
+    @PostMapping("/phone")
+    public void updatePhone(@RequestBody UpdateUserPhoneCMD updateUserPhoneCMD,
+                             @AuthenticationPrincipal UserPrincipal principal) {
+        updateUserPhoneCMD.setUserId(principal.getId());
+        userService.updateUserPhone(updateUserPhoneCMD);
+    }
 }

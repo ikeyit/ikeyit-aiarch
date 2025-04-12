@@ -1,40 +1,41 @@
 package com.ikeyit.account.infrastructure.security;
 
 
-import com.ikeyit.account.domain.repository.UserRepository;
+import com.ikeyit.account.application.service.UserService;
+import com.ikeyit.common.exception.BizException;
+import com.ikeyit.common.exception.CommonErrorCode;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 @Service
 public class PasswordAuthUserService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
-    private final UserPrincipalBuilder userPrincipalBuilder;
-
-    public PasswordAuthUserService(UserRepository userRepository, UserPrincipalBuilder userPrincipalBuilder) {
-        this.userRepository = userRepository;
-        this.userPrincipalBuilder = userPrincipalBuilder;
+    private PasswordAuthUserService(UserService userService) {
+        this.userService = userService;
     }
 
     @Override
-    public UserPrincipal loadUserByUsername(String username) throws UsernameNotFoundException {
-        if (!StringUtils.hasText(username)) {
-            throw new UsernameNotFoundException("The login name is blank!");
+    public UserPrincipal loadUserByUsername(String username) {
+        var user = userService.loadUserAuth(username);
+        if (!StringUtils.hasLength(user.getPassword())) {
+            throw new BizException(CommonErrorCode.FORBIDDEN, "It's not allowed to login with password");
         }
-        
-        // Check if username is an email address
-        if (username.contains("@")) {
-            return userRepository.findByEmail(username)
-                .map(userPrincipalBuilder::buildUserPrincipal)
-                .orElseThrow(() -> new UsernameNotFoundException("User is not found!"));
-        }
-        
-        // If not an email, try mobile number
-        return userRepository.findByMobile(username)
-            .map(userPrincipalBuilder::buildUserPrincipal)
-            .orElseThrow(() -> new UsernameNotFoundException("User is not found!"));
+        return new UserPrincipal(
+            user.getId(),
+            user.getUsername(),
+            user.getPassword(),
+            user.getDisplayName(),
+            user.getAvatar(),
+            user.getLocale(),
+            user.getEmail(),
+            user.getPhone(),
+            user.getRoles(),
+            user.isEnabled(),
+            true,
+            true,
+            true);
     }
 }

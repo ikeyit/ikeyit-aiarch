@@ -24,7 +24,7 @@ paths:
       tags:
         - Auth
       summary: Authenticate user
-      description: Authenticates a user with the provided email or mobile number and password
+      description: Authenticates a user with the provided email or phone number and password
       operationId: authenticateUser
       requestBody:
         description: User authentication information
@@ -39,7 +39,7 @@ paths:
               properties:
                 username:
                   type: string
-                  description: Email or Mobile number
+                  description: Email or Phone number
                 password:
                   type: string
                   format: password
@@ -116,13 +116,13 @@ paths:
         - csrfToken: []
       tags:
         - Auth
-      summary: Verify email or mobile for signup
-      description: Verifies the email or mobile number provided for user registration
+      summary: Verify email or phone for signup
+      description: Verifies the email or phone number provided for user registration
       operationId: verifySignup
       parameters:
         - name: target
           in: query
-          description: Email or mobile number to verify
+          description: Email or phone number to verify
           required: true
           schema:
             type: string
@@ -139,7 +139,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResp'
-                
   /auth/send-code:
     post:
       security:
@@ -147,7 +146,7 @@ paths:
       tags:
         - Auth
       summary: Send verification code
-      description: Sends a verification code to the specified email or mobile number for authentication
+      description: Sends a verification code to the specified email or phone number for authentication
       operationId: sendVerificationCode
       requestBody:
         description: Target information for sending verification code
@@ -161,7 +160,7 @@ paths:
               properties:
                 target:
                   type: string
-                  description: Email or mobile number to send verification code to
+                  description: Email or phone number to send verification code to
       responses:
         '200':
           description: Verification code sent successfully
@@ -188,7 +187,7 @@ paths:
       tags:
         - Auth
       summary: Verify code for authentication
-      description: Authenticates a user with the provided email or mobile number and verification code
+      description: Authenticates a user with the provided email or phone number and verification code
       operationId: verifyCodeAuthentication
       requestBody:
         description: Verification code authentication information
@@ -203,7 +202,7 @@ paths:
               properties:
                 target:
                   type: string
-                  description: Email or mobile number
+                  description: Email or phone number
                 code:
                   type: string
                   description: Verification code received
@@ -251,7 +250,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResp'
-    patch:
+    post:
       tags:
         - User
       summary: Update user profile
@@ -288,7 +287,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResp'
 
   /api/user/locale:
-    patch:
+    post:
       tags:
         - User
       summary: Update user locale
@@ -344,6 +343,138 @@ paths:
       responses:
         '200':
           description: Password successfully updated
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+                
+  /api/user/email/verification:
+    post:
+      tags:
+        - User
+      summary: Send verification code for email update
+      description: Sends a verification code to the specified email for updating user's email
+      operationId: sendVerificationCodeForUpdateEmail
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      requestBody:
+        description: Email information for sending verification code
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendEmailVerificationCodeCMD'
+      responses:
+        '200':
+          description: Verification code sent successfully
+        '400':
+          description: Invalid input or rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+                
+  /api/user/phone/verification:
+    post:
+      tags:
+        - User
+      summary: Send verification code for phone update
+      description: Sends a verification code to the specified phone number for updating user's phone
+      operationId: sendVerificationCodeForUpdatePhone
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      requestBody:
+        description: Phone information for sending verification code
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendPhoneVerificationCodeCMD'
+      responses:
+        '200':
+          description: Verification code sent successfully
+        '400':
+          description: Invalid input or rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+                
+  /api/user/email:
+    post:
+      tags:
+        - User
+      summary: Update user email
+      description: Updates the user's email address after verification
+      operationId: updateEmail
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      requestBody:
+        description: Email update information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserEmailCMD'
+      responses:
+        '200':
+          description: Email successfully updated
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResp'
+                
+  /api/user/phone:
+    post:
+      tags:
+        - User
+      summary: Update user phone
+      description: Updates the user's phone number after verification
+      operationId: updatePhone
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      requestBody:
+        description: Phone update information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserPhoneCMD'
+      responses:
+        '200':
+          description: Phone successfully updated
         '400':
           description: Invalid input
           content:
@@ -456,9 +587,9 @@ components:
           type: string
           format: email
           description: User email address
-        mobile:
+        phone:
           type: string
-          description: User mobile phone number
+          description: User phone phone number
         displayName:
           type: string
           description: User's display name
@@ -476,9 +607,9 @@ components:
         username:
           type: string
           description: Username
-        mobile:
+        phone:
           type: string
-          description: User mobile phone number
+          description: User phone phone number
         email:
           type: string
           format: email
@@ -565,3 +696,49 @@ components:
           additionalProperties:
             type: string
           description: Additional fields required for the upload
+          
+    SendEmailVerificationCodeCMD:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email address to send verification code to
+          
+    SendPhoneVerificationCodeCMD:
+      type: object
+      required:
+        - phone
+      properties:
+        phone:
+          type: string
+          description: Phone number to send verification code to
+          
+    UpdateUserEmailCMD:
+      type: object
+      required:
+        - email
+        - code
+      properties:
+        email:
+          type: string
+          format: email
+          description: New email address
+        code:
+          type: string
+          description: Verification code received
+          
+    UpdateUserPhoneCMD:
+      type: object
+      required:
+        - phone
+        - code
+      properties:
+        phone:
+          type: string
+          description: New phone number
+        code:
+          type: string
+          description: Verification code received

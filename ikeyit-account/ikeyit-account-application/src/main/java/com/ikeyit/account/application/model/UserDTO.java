@@ -7,7 +7,7 @@ public class UserDTO {
 
     String username;
 
-    String mobile;
+    String phone;
 
     String email;
 
@@ -25,6 +25,8 @@ public class UserDTO {
 
     boolean verified;
 
+    boolean hasPassword;
+
     public Long getId() {
         return id;
     }
@@ -41,12 +43,12 @@ public class UserDTO {
         this.username = username;
     }
 
-    public String getMobile() {
-        return mobile;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setMobile(String mobile) {
-        this.mobile = mobile;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getEmail() {
@@ -111,5 +113,13 @@ public class UserDTO {
 
     public void setVerified(boolean verified) {
         this.verified = verified;
+    }
+
+    public boolean isHasPassword() {
+        return hasPassword;
+    }
+
+    public void setHasPassword(boolean hasPassword) {
+        this.hasPassword = hasPassword;
     }
 }

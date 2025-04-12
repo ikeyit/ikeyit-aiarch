@@ -4,7 +4,9 @@ logging:
     org.springframework.security: debug
 spring:
   config:
+    # Create your application.yml in the following folder to overwrite the properties
     import: "optional:file:${user.home}/ikeyit-config/ikeyit-account/"
+  # Configure the database
   datasource:
     account:
       url: jdbc:postgresql://postgresql-server:5432/account?currentSchema=public&stringtype=unspecified
@@ -15,59 +17,106 @@ spring:
         minimum-idle: 2
         idle-timeout: 60000
   data:
+    # Configure the redis server
     redis:
       host: redis-server
       port: 6379
+  # Configure object storage service. e.g. amazon s3
+  blobstore:
+    account:
+      region: us-east-2
+      endpoint: https://s3.us-east-2.amazonaws.com
+      accessKey: access key
+      secretKey: secret key
+      bucket: bucket name
+      cdnUrl: your cdn url for s3 storage
   security:
+    # Configure remember me functionality
+    remember-me:
+      enabled: false
+      key: your key
+      token-validity-seconds: 1209600 # 14 days
+      parameter: "remember-me"
+      cookie-name: "remember-me-cookie"
     oauth2:
+      # Configure social login
+      client:
+        registration:
+          google:
+            client-id: your client id
+            client-secret: your client secret
+            scope: openid, email, profile
+            redirect-uri: "{baseUrl}/auth/oauth2/code/{registrationId}"
+        provider:
+          google:
+            issuer-uri: https://accounts.google.com
+      # Configure the authorizationserver to enable SSO for the other systems
       authorizationserver:
-        issuer: https://auth.ikeyit.com
+        # replace with your JWK file
         jwk-set-file: ${user.home}/ikeyit-config/ikeyit-account/JWK.json
-        id-token-time-to-live: 1d
+        # Configure the clients. TODO Store the clients in database
         client:
           store-web-client:
             registration:
               client-id: store-web-client
-              client-secret: "{noop}store-web-client"
               client-authentication-methods:
-                - client_secret_basic
+                - none
               authorization-grant-types:
                 - authorization_code
                 - refresh_token
               redirect-uris:
-                - http://store.dev.local:6112/auth/oauth2/code/web-client
-              post-logout-redirect-uris:
-                - http://store.dev.local:6112
+                - http://localhost:5173/callback
               scopes:
                 - openid
                 - profile
                 - email
-                - role
+                - roles
             token:
               access-token-time-to-live: 60m
               refresh-token-time-to-live: 360m
               reuse-refresh-tokens: false
             require-authorization-consent: false
-          admin-web-client:
+            require-proof-key: true
+          library-system:
             registration:
-              client-id: admin-web-client
-              client-secret: "{noop}admin-web-client"
+              client-id: library-system
+              client-secret: "{noop}library-system"
               client-authentication-methods:
-                - client_secret_basic
+                - client_secret_post
               authorization-grant-types:
                 - authorization_code
                 - refresh_token
               redirect-uris:
-                - http://admin.dev.local:6113/auth/oauth2/code/web-client
-              post-logout-redirect-uris:
-                - http://admin.dev.local:6113
+                - http://localhost:3000/api/auth/callback/oidc
               scopes:
                 - openid
                 - profile
                 - email
-                - role
+                - roles
             token:
               access-token-time-to-live: 60m
               refresh-token-time-to-live: 360m
               reuse-refresh-tokens: false
             require-authorization-consent: false
+            require-proof-key: true
+          ikeyit-classroom-ios:
+            registration:
+              client-id: ikeyit-classroom-ios
+              client-authentication-methods:
+                - none
+              authorization-grant-types:
+                - authorization_code
+                - refresh_token
+              redirect-uris:
+                - com.ikeyit.Classroom:/oauth2redirect
+              scopes:
+                - openid
+                - profile
+                - email
+                - roles
+            token:
+              access-token-time-to-live: 60m
+              refresh-token-time-to-live: 360m
+              reuse-refresh-tokens: false
+            require-authorization-consent: false
+            require-proof-key: true

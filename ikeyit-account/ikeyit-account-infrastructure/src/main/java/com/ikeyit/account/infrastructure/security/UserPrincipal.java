@@ -3,10 +3,11 @@ package com.ikeyit.account.infrastructure.security;
 
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A user representation in security context
@@ -23,6 +24,10 @@ public class UserPrincipal implements UserDetails, CredentialsContainer {
 
     private String avatar;
 
+    private String email;
+
+    private String phone;
+
     private Set<? extends GrantedAuthority>  authorities;
 
     private boolean accountNonExpired = true;
@@ -38,30 +43,34 @@ public class UserPrincipal implements UserDetails, CredentialsContainer {
     public UserPrincipal() {
     }
 
-    public UserPrincipal(Long id, String username, Set<? extends GrantedAuthority>  authorities) {
+    public UserPrincipal(Long id,
+                         String username, String password,
+                         String displayName,
+                         String avatar,
+                         String locale,
+                         String email,
+                         String phone,
+                         Set<String> roles,
+                         boolean enabled,
+                         boolean accountNonExpired,
+                         boolean accountNonLocked,
+                         boolean credentialsNonExpired) {
         this.id = id;
-        this.username = username;
-        this.authorities = authorities;
-    }
-
-    public UserPrincipal(Long id, String username, String password, boolean enabled,
-                                boolean accountNonExpired, boolean credentialsNonExpired,
-                                boolean accountNonLocked, Set<? extends GrantedAuthority>  authorities) {
-
-        if (id == null) {
-            throw new IllegalArgumentException(
-                    "Cannot pass null or empty values to constructor");
-        }
-        this.id = id;
-        this.username = username;
         this.password = password;
+        this.username = username;
+        this.displayName = displayName;
+        this.avatar = avatar;
+        this.locale = locale;
+        this.email = email;
+        this.phone = phone;
+        this.authorities = roles == null ? Set.of() : roles.stream()
+            .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+            .collect(Collectors.toUnmodifiableSet());
         this.enabled = enabled;
         this.accountNonExpired = accountNonExpired;
-        this.credentialsNonExpired = credentialsNonExpired;
         this.accountNonLocked = accountNonLocked;
-        this.authorities = Collections.unmodifiableSet(authorities);
+        this.credentialsNonExpired = credentialsNonExpired;
     }
-
 
     public Long getId() {
         return id;
@@ -118,12 +127,28 @@ public class UserPrincipal implements UserDetails, CredentialsContainer {
         return locale;
     }
 
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
     public void setLocale(String locale) {
         this.locale = locale;
     }
 
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public void eraseCredentials() {

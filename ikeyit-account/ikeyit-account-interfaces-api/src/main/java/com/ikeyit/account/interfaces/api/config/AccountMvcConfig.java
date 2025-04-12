@@ -26,7 +26,9 @@ public class AccountMvcConfig implements WebMvcConfigurer {
             public void setLocaleContext(HttpServletRequest request, HttpServletResponse response, LocaleContext localeContext) {
                 String domainName = request.getServerName();
                 int pos = domainName.indexOf('.');
-                domainName = domainName.substring(pos);
+                if (pos >= 0) {
+                    domainName = domainName.substring(pos);
+                }
                 log.debug("Parent domain: {}", domainName);
                 this.setCookieDomain(domainName);
                 super.setLocaleContext(request, response, localeContext);

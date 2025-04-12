@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class AccountObjectStorageConfig {
 
     @Bean
-    @ConfigurationProperties("ikeyit.account.s3")
+    @ConfigurationProperties("spring.blobstore.account")
     public S3ObjectStorageProperties s3ObjectStorageProperties() {
         return new S3ObjectStorageProperties();
     }

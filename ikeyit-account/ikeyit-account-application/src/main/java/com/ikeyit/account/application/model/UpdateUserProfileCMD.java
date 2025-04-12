@@ -42,6 +42,10 @@ public class UpdateUserProfileCMD {
         return gender;
     }
 
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
     public String getLocation() {
         return location;
     }

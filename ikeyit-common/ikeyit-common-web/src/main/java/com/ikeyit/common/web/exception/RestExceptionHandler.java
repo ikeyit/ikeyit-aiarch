@@ -38,9 +38,9 @@ public class RestExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(RestExceptionHandler.class);
 
-    private static final String MESSAGE_KEY_PREFIX = "error.";
+    protected static final String MESSAGE_KEY_PREFIX = "error.";
     
-    private final MessageSource messageSource;
+    protected final MessageSource messageSource;
 
     public RestExceptionHandler(MessageSource messageSource) {
         this.messageSource = messageSource;

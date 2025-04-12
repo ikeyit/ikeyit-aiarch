@@ -5,10 +5,10 @@ import com.ikeyit.account.application.model.*;
 import com.ikeyit.account.domain.model.User;
 import com.ikeyit.account.domain.repository.UserRepository;
 import com.ikeyit.common.data.IdUtils;
-import com.ikeyit.common.data.PrivacyUtils;
 import com.ikeyit.common.exception.BizAssert;
+import com.ikeyit.common.exception.BizException;
 import com.ikeyit.common.exception.CommonErrorCode;
-import com.ikeyit.common.storage.ObjectStorageService;
+import com.ikeyit.security.code.core.VerificationCodeException;
 import com.ikeyit.security.code.core.VerificationCodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +17,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 /**
  * Manage user account!
@@ -28,119 +29,183 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    private final ObjectStorageService objectStorageService;
-
     private final PasswordEncoder passwordEncoder;
 
     private final PasswordValidator passwordValidator;
+    
+    private final ContactInfoValidator contactInfoValidator;
 
     private final VerificationCodeService signupEmailVerificationCodeService;
 
-    private final VerificationCodeService signupMobileVerificationCodeService;
+    private final VerificationCodeService signupPhoneVerificationCodeService;
 
     private final VerificationCodeService updateEmailVerificationCodeService;
 
-    private final VerificationCodeService updateMobileVerificationCodeService;
+    private final VerificationCodeService updatePhoneVerificationCodeService;
+
+    private final UserDtoBuilder userDtoBuilder;
 
     public UserService(UserRepository userRepository,
-                       ObjectStorageService objectStorageService,
+                       UserDtoBuilder userDtoBuilder,
                        PasswordEncoder passwordEncoder,
                        PasswordValidator passwordValidator,
+                       ContactInfoValidator contactInfoValidator,
                        @Qualifier("signupEmailVerificationCodeService")
                        VerificationCodeService signupEmailVerificationCodeService,
-                       @Qualifier("signupMobileVerificationCodeService")
-                       VerificationCodeService signupMobileVerificationCodeService,
+                       @Qualifier("signupPhoneVerificationCodeService")
+                       VerificationCodeService signupPhoneVerificationCodeService,
                        @Qualifier("updateEmailVerificationCodeService")
                        VerificationCodeService updateEmailVerificationCodeService,
-                       @Qualifier("updateMobileVerificationCodeService")
-                       VerificationCodeService updateMobileVerificationCodeService) {
+                       @Qualifier("updatePhoneVerificationCodeService")
+                       VerificationCodeService updatePhoneVerificationCodeService) {
         this.userRepository = userRepository;
-        this.objectStorageService = objectStorageService;
+        this.userDtoBuilder = userDtoBuilder;
         this.passwordEncoder = passwordEncoder;
         this.passwordValidator = passwordValidator;
+        this.contactInfoValidator = contactInfoValidator;
         this.signupEmailVerificationCodeService = signupEmailVerificationCodeService;
-        this.signupMobileVerificationCodeService = signupMobileVerificationCodeService;
+        this.signupPhoneVerificationCodeService = signupPhoneVerificationCodeService;
         this.updateEmailVerificationCodeService = updateEmailVerificationCodeService;
-        this.updateMobileVerificationCodeService = updateMobileVerificationCodeService;
+        this.updatePhoneVerificationCodeService = updatePhoneVerificationCodeService;
     }
 
     public UserDTO getUser(Long userId) {
         User user = getExistingUser(userId);
-        return buildUserDTO(user);
+        return userDtoBuilder.buildUserDTO(user);
+    }
+
+    public UserAuthDTO loadUserAuth(Long userId) {
+        BizAssert.notNull(userId, "userId must not be null");
+        return userRepository.findById(userId)
+            .map(userDtoBuilder::buildUserAuthDTO)
+            .orElseThrow(BizAssert.failSupplier("User is not found!"));
+    }
+
+    public UserAuthDTO loadUserAuth(String username) {
+        BizAssert.hasLength(username, "username is required");
+        // if username is an email address
+        if (username.contains("@")) {
+            return userRepository.findByEmail(username)
+                .map(userDtoBuilder::buildUserAuthDTO)
+                .orElseThrow(BizAssert.failSupplier("User is not found!"));
+        }
+        // If username is a phone number
+        if (username.startsWith("+")) {
+            return userRepository.findByPhone(username)
+                .map(userDtoBuilder::buildUserAuthDTO)
+                .orElseThrow(BizAssert.failSupplier("User is not found!"));
+        }
+        return userRepository.findByUsername(username)
+            .map(userDtoBuilder::buildUserAuthDTO)
+            .orElseThrow(BizAssert.failSupplier("User is not found!"));
     }
 
     /**
-     * verify the email or mobile for signup
+     * verify the email or phone for signup
      */
-    public VerifySignupResultDTO verifySignup(String username) {
-        BizAssert.notNull(username, "username must not be null");
+    public VerifySignupResultDTO verifySignup(VerifySignupCMD verifySignupCMD) {
+        BizAssert.notNull(verifySignupCMD, "verifySignupCMD must not be null");
+        String username = verifySignupCMD.getUsername();
+        BizAssert.hasLength(username, "username is required");
         if (username.contains("@")) {
+            contactInfoValidator.validateEmail(username);
             BizAssert.isTrue(userRepository.findByEmail(username).isEmpty(), "email already exists");
             signupEmailVerificationCodeService.sendCode(username);
             return new VerifySignupResultDTO("A code has been sent to your email");
+        } else if (username.startsWith("+")) {
+            contactInfoValidator.validatePhone(username);
+            BizAssert.isTrue(userRepository.findByPhone(username).isEmpty(), "phone already exists");
+            signupPhoneVerificationCodeService.sendCode(username);
+            return new VerifySignupResultDTO("A code has been sent to your phone");
         } else {
-            BizAssert.isTrue(userRepository.findByMobile(username).isEmpty(), "mobile already exists");
-            signupMobileVerificationCodeService.sendCode(username);
-            return new VerifySignupResultDTO("A code has been sent to your mobile");
+            throw new BizException(CommonErrorCode.INVALID_ARGUMENT, "username must be an email address or a phone number");
         }
     }
 
     @Transactional(transactionManager = "accountTransactionManager")
-    public UserDTO signup(SignupCMD signupCMD) {
+    public UserAuthDTO signup(SignupCMD signupCMD) {
         BizAssert.notNull(signupCMD, "signupCMD must not be null");
-        BizAssert.isTrue(signupCMD.getEmail() != null || signupCMD.getMobile() != null,
-                "Please specify either email or mobile");
+        String username = signupCMD.getUsername();
+        BizAssert.hasLength(username, "username must not be empty");
+        String displayName = signupCMD.getDisplayName();
+        String password = signupCMD.getPassword();
+        String code = signupCMD.getCode();
         var userBuilder = User.newBuilder()
-                .username(generateUsername())
+                .username(generateUsername()) // This username is a general username which is not enabled now
                 .locale(getCurrentLocale())
-                .displayName(signupCMD.getDisplayName());
+                .displayName(displayName);
         // validate the password strength
-        passwordValidator.validate(signupCMD.getPassword());
-        userBuilder.password(passwordEncoder.encode(signupCMD.getPassword()));
-        if (signupCMD.getEmail() != null) {
+        passwordValidator.validate(password);
+        userBuilder.password(passwordEncoder.encode(password));
+        if (username.contains("@")) {
             // validate the email
-            signupEmailVerificationCodeService.validate(signupCMD.getEmail(), signupCMD.getCode());
-            userRepository.findByEmail(signupCMD.getEmail())
+            contactInfoValidator.validateEmail(username);
+            userRepository.findByEmail(username)
                     .ifPresent(BizAssert.failAction(CommonErrorCode.OCCUPIED, "The email is occupied!"));
-            userBuilder.email(signupCMD.getEmail());
+            signupEmailVerificationCodeService.validate(username, code);
+            userBuilder.email(username);
+        } else if (username.startsWith("+")) {
+            // validate the phone
+            contactInfoValidator.validatePhone(username);
+            userRepository.findByPhone(username)
+                    .ifPresent(BizAssert.failAction(CommonErrorCode.OCCUPIED, "The phone is occupied!"));
+            signupPhoneVerificationCodeService.validate(username, code);
+            userBuilder.phone(username);
         } else {
-            // validate the mobile
-            signupMobileVerificationCodeService.validate(signupCMD.getMobile(), signupCMD.getCode());
-            userRepository.findByMobile(signupCMD.getMobile())
-                    .ifPresent(BizAssert.failAction(CommonErrorCode.OCCUPIED, "The mobile is occupied!"));
-            userBuilder.mobile(signupCMD.getMobile());
+            throw new BizException(CommonErrorCode.INVALID_ARGUMENT, "username must be an email address or a phone number");
         }
         User user = userBuilder.build();
         userRepository.create(user);
-        return buildUserDTO(user);
+        return userDtoBuilder.buildUserAuthDTO(user);
     }
 
     @Transactional(transactionManager = "accountTransactionManager")
-    public UserDTO signupWithMobileInstantly(String mobile) {
-        BizAssert.notNull(mobile, "mobile must not be null");
-        userRepository.findByMobile(mobile)
-                .ifPresent(BizAssert.failAction(CommonErrorCode.OCCUPIED, "The mobile is occupied!"));
-        User user = User.newBuilder()
-                .username(generateUsername())
-                .locale(getCurrentLocale())
-                .mobile(mobile)
-                .build();
-        userRepository.create(user);
-        return buildUserDTO(user);
+    public UserAuthDTO loadOrCreateUserByEmailOrPhone(String target) {
+        if (target.contains("@")) {
+            contactInfoValidator.validateEmail(target);
+            return loadOrCreateUserByEmail(target);
+        } else if (target.startsWith("+")) {
+            contactInfoValidator.validatePhone(target);
+            return loadOrCreateUserByPhone(target);
+        } else {
+            throw new BizException(CommonErrorCode.INVALID_ARGUMENT, "target must be an email address or a phone number");
+        }
     }
 
     @Transactional(transactionManager = "accountTransactionManager")
-    public UserDTO signupWithEmailInstantly(String email) {
+    public UserAuthDTO loadOrCreateUserByPhone(String phone) {
+        BizAssert.notNull(phone, "phone must not be null");
+        contactInfoValidator.validatePhone(phone);
+        var user = userRepository.findByPhone(phone)
+            .orElseGet(() -> {
+                var newUser = User.newBuilder()
+                    .username(generateUsername())
+                    .displayName(generateDisplayName())
+                    .locale(getCurrentLocale())
+                    .phone(phone)
+                    .build();
+                userRepository.create(newUser);
+                return newUser;
+            });
+       return userDtoBuilder.buildUserAuthDTO(user);
+    }
+
+    @Transactional(transactionManager = "accountTransactionManager")
+    public UserAuthDTO loadOrCreateUserByEmail(String email) {
         BizAssert.notNull(email, "email must not be null");
-        userRepository.findByEmail(email)
-                .ifPresent(BizAssert.failAction(CommonErrorCode.OCCUPIED, "The email is occupied!"));
-        User user = User.newBuilder()
-                .username(generateUsername())
-                .locale(getCurrentLocale())
-                .email(email)
-                .build();
-        userRepository.create(user);
-        return buildUserDTO(user);
+        contactInfoValidator.validateEmail(email);
+        var user = userRepository.findByEmail(email)
+            .orElseGet(() -> {
+                var newUser = User.newBuilder()
+                    .username(generateUsername())
+                    .displayName(generateDisplayName())
+                    .locale(getCurrentLocale())
+                    .email(email)
+                    .build();
+                userRepository.create(newUser);
+                return newUser;
+            });
+        return userDtoBuilder.buildUserAuthDTO(user);
     }
 
     @Transactional(transactionManager = "accountTransactionManager")
@@ -153,7 +218,7 @@ public class UserService {
                 updateUserProfileCMD.getGender(),
                 updateUserProfileCMD.getLocation());
         userRepository.update(user);
-        return buildUserDTO(user);
+        return userDtoBuilder.buildUserDTO(user);
     }
 
     @Transactional(transactionManager = "accountTransactionManager")
@@ -162,35 +227,67 @@ public class UserService {
         User user = getExistingUser(updateUserLocaleCMD.getUserId());
         user.updateLocale(updateUserLocaleCMD.getLocale());
         userRepository.update(user);
-        return buildUserDTO(user);
+        return userDtoBuilder.buildUserDTO(user);
     }
 
     @Transactional(transactionManager = "accountTransactionManager")
     public void updatePassword(UpdateUserPasswordCMD updateUserPasswordCMD) {
         BizAssert.notNull(updateUserPasswordCMD, "updateUserPasswordCMD must not be null");
         User user = getExistingUser(updateUserPasswordCMD.getUserId());
-        BizAssert.isTrue(passwordEncoder.matches(updateUserPasswordCMD.getPassword(), user.getPassword()),
+        if (StringUtils.hasLength(user.getPassword())) {
+            BizAssert.isTrue(passwordEncoder.matches(updateUserPasswordCMD.getPassword(), user.getPassword()),
                 "The password is wrong");
-        BizAssert.isFalse(passwordEncoder.matches(updateUserPasswordCMD.getNewPassword(), user.getPassword()),
+            BizAssert.isFalse(passwordEncoder.matches(updateUserPasswordCMD.getNewPassword(), user.getPassword()),
                 "The new password should not be same with the previous one");
+        }
         passwordValidator.validate(updateUserPasswordCMD.getNewPassword());
         user.updatePassword(passwordEncoder.encode(updateUserPasswordCMD.getNewPassword()));
         userRepository.update(user);
     }
 
+    /**
+     * Send verification code
+     */
+    public void sendVerificationCodeForUpdatePhone(SendPhoneVerificationCodeCMD sendPhoneVerificationCodeCMD) {
+        BizAssert.notNull(sendPhoneVerificationCodeCMD, "sendPhoneVerificationCMD must not be null");
+        String phone = sendPhoneVerificationCodeCMD.getPhone();
+        contactInfoValidator.validatePhone(phone);
+        userRepository.findByPhone(phone)
+            .ifPresent(BizAssert.failAction(CommonErrorCode.OCCUPIED, "The phone is occupied by the other one!"));
+        try {
+            updatePhoneVerificationCodeService.sendCode(phone);
+        } catch (VerificationCodeException e) {
+            throw new BizException(CommonErrorCode.INVALID_ARGUMENT, e.getMessage());
+        }
+    }
+
     @Transactional(transactionManager = "accountTransactionManager")
-    public UserDTO updateUserMobile(UpdateUserMobileCMD updateUserMobileCMD) {
-        BizAssert.notNull(updateUserMobileCMD, "updateUserMobileCMD must not be null");
-        String code = updateUserMobileCMD.getCode();
-        String mobile = updateUserMobileCMD.getMobile();
-        updateMobileVerificationCodeService.validate(mobile, code);
-        User user = getExistingUser(updateUserMobileCMD.getUserId());
-        BizAssert.notEquals(user.getMobile(), mobile, "The new mobile number is the same with the previous one");
-        userRepository.findByMobile(mobile)
-                .ifPresent(BizAssert.failAction(CommonErrorCode.OCCUPIED, "The mobile is occupied!"));
-        user.updateMobile(mobile);
+    public UserDTO updateUserPhone(UpdateUserPhoneCMD updateUserPhoneCMD) {
+        BizAssert.notNull(updateUserPhoneCMD, "updateUserPhoneCMD must not be null");
+        String code = updateUserPhoneCMD.getCode();
+        String phone = updateUserPhoneCMD.getPhone();
+        contactInfoValidator.validatePhone(phone);
+        updatePhoneVerificationCodeService.validate(phone, code);
+        User user = getExistingUser(updateUserPhoneCMD.getUserId());
+        BizAssert.notEquals(user.getPhone(), phone, "The new phone number is the same with the previous one");
+        userRepository.findByPhone(phone)
+                .ifPresent(BizAssert.failAction(CommonErrorCode.OCCUPIED, "The phone is occupied!"));
+        user.updatePhone(phone);
         userRepository.update(user);
-        return buildUserDTO(user);
+        return userDtoBuilder.buildUserDTO(user);
+    }
+
+    public void sendVerificationCodeForUpdateEmail(SendEmailVerificationCodeCMD sendEmailVerificationCodeCMD) {
+        BizAssert.notNull(sendEmailVerificationCodeCMD, "sendEmailVerificationCMD must not be null");
+        String email = sendEmailVerificationCodeCMD.getEmail();
+        contactInfoValidator.validateEmail(email);
+        userRepository.findByEmail(email)
+            .ifPresent(BizAssert.failAction(CommonErrorCode.OCCUPIED, "The email address is occupied by the other one!"));
+        try {
+            updateEmailVerificationCodeService.sendCode(email);
+        } catch (VerificationCodeException e) {
+            throw new BizException(CommonErrorCode.INVALID_ARGUMENT, e.getMessage());
+        }
     }
 
     @Transactional(transactionManager = "accountTransactionManager")
@@ -198,6 +295,7 @@ public class UserService {
         BizAssert.notNull(updateUserEmailCMD, "updateUserEmailCMD must not be null");
         String email = updateUserEmailCMD.getEmail();
         String code = updateUserEmailCMD.getCode();
+        contactInfoValidator.validateEmail(email);
         updateEmailVerificationCodeService.validate(email, code);
         User user = getExistingUser(updateUserEmailCMD.getUserId());
         BizAssert.notEquals(user.getEmail(), email, "The new email number is the same with the previous one");
@@ -205,7 +303,7 @@ public class UserService {
                 .ifPresent(BizAssert.failAction(CommonErrorCode.OCCUPIED, "The email address is occupied!"));
         user.updateEmail(email);
         userRepository.update(user);
-        return buildUserDTO(user);
+        return userDtoBuilder.buildUserDTO(user);
     }
 
     private User getExistingUser(Long userId) {
@@ -213,27 +311,16 @@ public class UserService {
                 .orElseThrow(BizAssert.failSupplier(CommonErrorCode.INVALID_ARGUMENT, "Not found"));
     }
 
-    private UserDTO buildUserDTO(User user) {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(user.getId());
-        userDTO.setUsername(user.getUsername());
-        userDTO.setLocale(user.getLocale());
-        userDTO.setLocation(userDTO.getLocation());
-        userDTO.setEnabled(user.isEnabled());
-        userDTO.setVerified(user.isVerified());
-        userDTO.setGender(user.getGender());
-        userDTO.setDisplayName(user.getDisplayName());
-        userDTO.setAvatar(objectStorageService.getCdnUrl(user.getAvatar()));
-        userDTO.setMobile(PrivacyUtils.hidePrivacy(user.getMobile(), 4));
-        userDTO.setEmail(PrivacyUtils.hideEmail(user.getEmail(), 4));
-        return userDTO;
-    }
-
     private String getCurrentLocale() {
-        return LocaleContextHolder.getLocale().toString();
+        return LocaleContextHolder.getLocale().toLanguageTag();
     }
 
     private String generateUsername() {
         return IdUtils.uuid();
     }
+
+    private String generateDisplayName() {
+        return IdUtils.uuid();
+    }
+
 }

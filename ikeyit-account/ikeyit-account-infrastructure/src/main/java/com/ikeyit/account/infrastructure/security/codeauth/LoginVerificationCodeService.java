@@ -1,4 +1,4 @@
-package com.ikeyit.account.infrastructure.security;
+package com.ikeyit.account.infrastructure.security.codeauth;
 
 import com.ikeyit.common.exception.BizAssert;
 import com.ikeyit.security.code.core.VerificationCode;
@@ -10,15 +10,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class LoginVerificationCodeService implements VerificationCodeService {
 
-    private final VerificationCodeService mobileVerificationCodeService;
+    private final VerificationCodeService phoneVerificationCodeService;
 
     private final VerificationCodeService emailVerificationCodeService;
 
-    public LoginVerificationCodeService(@Qualifier("loginMobileVerificationCodeService")
-                                            VerificationCodeService mobileVerificationCodeService,
+    public LoginVerificationCodeService(@Qualifier("loginPhoneVerificationCodeService")
+                                            VerificationCodeService phoneVerificationCodeService,
                                         @Qualifier("loginEmailVerificationCodeService")
                                             VerificationCodeService emailVerificationCodeService) {
-        this.mobileVerificationCodeService = mobileVerificationCodeService;
+        this.phoneVerificationCodeService = phoneVerificationCodeService;
         this.emailVerificationCodeService = emailVerificationCodeService;
     }
 
@@ -26,7 +26,7 @@ public class LoginVerificationCodeService implements VerificationCodeService {
     public VerificationCode sendCode(String target) {
         BizAssert.notNull(target, "target is null!");
         if (target.contains("@")) {
-            return mobileVerificationCodeService.sendCode(target);
+            return phoneVerificationCodeService.sendCode(target);
         } else {
             return emailVerificationCodeService.sendCode(target);
         }
@@ -37,7 +37,7 @@ public class LoginVerificationCodeService implements VerificationCodeService {
         BizAssert.notNull(target, "target is null!");
         BizAssert.notNull(code, "code is null!");
         if (target.contains("@")) {
-            mobileVerificationCodeService.validate(target, code);
+            phoneVerificationCodeService.validate(target, code);
         } else{
             emailVerificationCodeService.validate(target, code);
         }

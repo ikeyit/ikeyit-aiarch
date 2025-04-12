@@ -26,7 +26,7 @@ public class AccountServiceGrpcImpl extends AccountServiceGrpc.AccountServiceImp
            .setUsername(userDTO.getUsername())
            .setDisplayName(userDTO.getDisplayName())
            .setEmail(userDTO.getEmail())
-           .setMobile(userDTO.getMobile())
+           .setPhone(userDTO.getPhone())
            .build());
         responseObserver.onCompleted();
     }

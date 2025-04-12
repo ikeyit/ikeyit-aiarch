@@ -8,6 +8,8 @@ dependencies {
     api("com.ikeyit:ikeyit-security-code-redis")
     api("com.ikeyit:ikeyit-security-codeauth-core")
     api("org.springframework.security:spring-security-core")
+    api("org.springframework.security:spring-security-oauth2-core")
+    api("org.springframework.security:spring-security-oauth2-client")
     implementation("org.springframework:spring-jdbc")
     implementation("org.springframework.boot:spring-boot")
     implementation("org.springframework.boot:spring-boot-autoconfigure")

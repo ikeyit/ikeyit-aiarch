@@ -104,7 +104,7 @@ public class VerificationCodeSenderFilter extends OncePerRequestFilter {
         }
         String target = request.getParameter(targetParameter);
         if (!StringUtils.hasText(target))
-            throw new BadCredentialsException("Target and code must not be empty or null");
+            throw new BadCredentialsException("Target must not be empty or null");
         try {
             VerificationCode verificationCode = verificationCodeService.sendCode(target);
             successHandler(request, response, verificationCode);
