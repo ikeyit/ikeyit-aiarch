@@ -1,3 +1,7 @@
+# IKEYIT AiArch
+
+[中文说明](README.zh-CN.md)
+
 ## What is IKEYIT AiArch
 IKEYIT AiArch is a collection of boilerplate projects (backend) for building large-scale internet applications. The code is collaboratively written by LLMs and humans. It attempts to implement a large project in a way that is easy for AI to understand and write code, exploring how to make AI a high-quality programming assistant.
 
@@ -36,3 +40,6 @@ The architecture covers:
 ### Other Documentation
 - Project Repository Structure: [PROJECT_STRUCTURE.zh-CN.md](docs/PROJECT_STRUCTURE.md)
 - AI Programming Best Practices Collection and Sharing: [BEST_PRACTICE.zh-CN.md](docs/BEST_PRACTICE.md)
+
+### Frontends
+- Account Frontend: [ikeyit-account-webclient](https://github.com/ikeyit/ikeyit-account-webclient)
