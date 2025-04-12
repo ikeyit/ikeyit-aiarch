@@ -1,43 +1,38 @@
-本项目将用实际行动来验证AI辅助开发在一个“大型”项目上的应用效果。
-你将在本项目里学习到如何构建一个大型互联网项目。重点是架构思维，不侧重算法和编码技巧（AI在这两方面远超一般人）。
-如何成为提示词大师，如何让AI成为高质量的助手也是本项目的重要目的。希望你能在本项目中有所收获，也希望把你的好经验分享给大家。
-[《AI辅助开发最佳实践》](BEST_PRACTICE.md)
-适合想初级向中高级进阶的朋友学习参考。
-# 学习路线
-完成本项目要具备以下方面的基础知识，按顺序学习即可。太多？不要怕，用到啥，再学啥也OK。AI帮你的每一次，都是一个很好学习过程。
-- 操作系统
-- 网络
-- 数据结构与算法 推荐印度老哥Harsha Suryanarayana的教程
-- 编程语言，比如JAVA，Python，Javascript，GO等。不用纠结选哪一门，重要的是思维，很容易做到丝滑切换，况且现在不还有AI帮忙翻译吗？哪种语言适合你的场景，就用哪一门。
-- 设计模式 推荐：https://refactoring.guru/design-patterns
-- 数据库
-- 分布式系统
-- 微服务架构
-- 中间件
-- 容器化和云原生
-- Devops
-- 机器学习与应用
+## What is IKEYIT AiArch
+IKEYIT AiArch is a collection of boilerplate projects (backend) for building large-scale internet applications. The code is collaboratively written by LLMs and humans. It attempts to implement a large project in a way that is easy for AI to understand and write code, exploring how to make AI a high-quality programming assistant.
 
-# 人类的经验
-AI是特别懂tradeoff的，面对多种技术方案可选时，它不会直接替你决策。我们需要一些经验和个人偏爱，用来指导AI进行决策。
-- 大型互联网项目，是个分布式系统，要采用微服务架构。
-- 大型项目往往业务很复杂，所以要采用领域驱动设计（DDD），事件驱动架构（EDA）。
-- 大型项目往往要支持多端，所以要前后端分离。
-- 后端语言首选Java。无论怎样，完善的生态，依旧是企业级项目后端的首选。java语法严格，AI生成的代码准确率会高一些。官网学习：https://docs.oracle.com/javase/tutorial
-- 框架SpringBoot。如果后端选了java，也没得其他选。官网学习：https://docs.spring.io/spring-boot/index.html
-- Web前端用Javascript。不用Typescript的原因是Javascript学习成本低, Typescript还是被编译回Javascript。AI时代多次一举，AI生成代码也更省token。
-- Web框架选react。它也支持native方式，可以用来开发ios和android。学习成本大大降低！当react的代码资源比vue更丰富，AI可参考资源也更多。当然这不重要，AI最擅长前端，直接生成原生APP也很容易。官网学习：https://react.dev/reference/react
-- 大型项目还需要考虑高可用，高性能，可扩展性，安全性等问题。
-- 目前不要指望AI能一条龙服务，问题越复杂，牵连越多AI越解决不了。需要把复杂问题拆解成多个小问题，然后逐个让其解决。
-人类解决问题思维方式：
-```
-1.多收集信息，多提想法，很乱     2.整理汇总成一个纲要    3. 再化整为零，按部就班逐个击破
-+-------------------+            +---+            +----------+
-| .    .  .      .  |            | . |            | ...      | 
-|   .      .  .     |            | . |            |     ...  | 
-| .    .        .   |     =>     | . |     =>     |    ....  | 
-|     .   .  .    . |            | . |            | ....     | 
-|  .      .      .  |            | . |            |     .... | 
-+-------------------+            +---+            +----------+  
-```
-我们使用AI也应该是这么个过程！
+### Architecture
+The architecture covers:
+- Microservice Architecture
+- Domain-Driven Design (DDD), Clean Architecture
+- Event-Driven Architecture (EDA)
+
+### Distributed System Technologies
+- Distributed Transactions, Eventually Consistency
+- Distributed Locks
+- Multi-level Caching
+- Data Consistency
+- Data Sharding, Read/Write Separation
+- Fault Tolerance
+
+### Business Scenarios
+- Authentication and Authorization
+- Permission Management
+- SAAS Multi-tenancy
+- E-commerce
+- Big Data Processing
+
+### Philosophy
+- Reduce dependencies, as excessive dependencies increase complexity, making it easier for AI to make mistakes and increasing the learning curve for humans
+- Clearer layering and modularization to help AI focus on specific issues
+- Use AI-friendly programming practices
+  - Name variables, methods, and classes with clear business semantics, for example: prefer calculateTotalPrice() over abbreviated calcTotPr()
+  - Provide clear and comprehensive comments
+  - Use self-descriptive data formats: for example, use strings for enums instead of numbers. Use {status:"ACTIVE"} instead of {status:1}
+- Don't use other tools/libraries for tasks that AI can handle. For example: Lombok, MapStruct, Swagger UI, Yeoman, JHipster, Lodash / Underscore.js, ORM
+- Choose mainstream technologies and solutions, avoid niche ones. The more mainstream, the more training data AI has, the better the results
+- Use native development (like Swift/Kotlin) instead of cross-platform frameworks (like Flutter/React Native). AI greatly reduces the barrier to native development, making an additional abstraction layer unnecessary while retaining all native development capabilities.
+
+### Other Documentation
+- Project Repository Structure: [PROJECT_STRUCTURE.zh-CN.md](docs/PROJECT_STRUCTURE.md)
+- AI Programming Best Practices Collection and Sharing: [BEST_PRACTICE.zh-CN.md](docs/BEST_PRACTICE.md)
