@@ -1,4 +1,4 @@
-# Always use yaml file to define application properties
+# AI-NOTE: Always use yaml file to define application properties
 server:
   shutdown: graceful
   servlet:

@@ -1,5 +1,5 @@
 plugins {
-    // NOTE: use this convention plugin for protocol buffer and grpc client project
+    // AI-NOTE: Use this convention plugin for sdk project
     id("com.ikeyit.build-grpc")
 }
 

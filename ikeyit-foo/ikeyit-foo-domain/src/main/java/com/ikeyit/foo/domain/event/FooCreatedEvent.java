@@ -7,11 +7,15 @@ import com.ikeyit.foo.domain.model.Foo;
 import java.time.Instant;
 
 /**
+ * <pre>
+ * === AI-NOTE ===
+ * - A domain event should extend BaseDomainEvent
+ * - A domain event should be immutable.
+ * - A domain event should be POJO without setter
+ * - A domain event can be serialized and deserialized as JSON
+ * === AI-NOTE-END ===
+ * </pre>
  * Event triggered when a new foo is created.
- * NOTE:
- * Domain event should extend BaseDomainEvent
- * Domain event should be immutable.
- * Domain event should be POJO without setter, it can be serialized and deserialized as JSON
  */
 public class FooCreatedEvent extends BaseDomainEvent {
     private Long id;
@@ -19,6 +23,13 @@ public class FooCreatedEvent extends BaseDomainEvent {
     private Instant createdAt;
     private Instant updatedAt;
 
+    /**
+     * <pre>
+     * === AI-NOTE ===
+     * - The constructor must be generated and marked using @ForRepo.
+     * === AI-NOTE-END ===
+     * The constructor is used only for persistence
+     */
     @ForRepo
     FooCreatedEvent() {
     }

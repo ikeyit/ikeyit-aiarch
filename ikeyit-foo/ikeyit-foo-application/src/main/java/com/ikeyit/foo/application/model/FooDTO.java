@@ -1,7 +1,11 @@
 package com.ikeyit.foo.application.model;
 
 /**
- * DTO for Foo.
+ * <pre>
+ * === AI-NOTE ===
+ * - Name a DTO as FooDTO
+ * === AI-NOTE-END ===
+ * </pre>
  */
 public class FooDTO {
     private Long id;

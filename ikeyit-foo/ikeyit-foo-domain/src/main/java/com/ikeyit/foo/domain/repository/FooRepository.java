@@ -6,9 +6,12 @@ import com.ikeyit.foo.domain.model.Foo;
 import java.util.List;
 
 /**
+ * <pre>
+ * === AI-NOTE ===
+ * - A CRUD repository should extend CrudRepository
+ * === AI-NOTE-END ===
+ * </pre>
  * Foo repository
- * NOTE:
- * If it's a CRUD repository, it should extend CrudRepository
  */
 public interface FooRepository extends CrudRepository<Foo, Long> {
     List<Foo> findAll();

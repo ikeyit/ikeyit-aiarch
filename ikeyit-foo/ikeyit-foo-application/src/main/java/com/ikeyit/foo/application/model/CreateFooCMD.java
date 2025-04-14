@@ -1,7 +1,12 @@
 package com.ikeyit.foo.application.model;
 
 /**
- * Foo creation command.
+ * <pre>
+ * === AI-NOTE ===
+ * - Name a parameters object as FooCMD for creating, updating and operating something
+ * === AI-NOTE-END ===
+ * </pre>
+ * The command to create a foo
  */
 public class CreateFooCMD {
     private String message;

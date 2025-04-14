@@ -18,19 +18,23 @@ import java.util.Optional;
 import static com.ikeyit.common.spring.jdbc.JdbcTemplateSupport.createWithGeneratedKey;
 
 /**
+ * <pre>
+ * === AI-NOTE ===
+ * - Use NamedJdbcTemplate and utilities in com.ikeyit.common.spring.jdbc to implement the repository
+ * - Use text block to define SQL
+ * - Use @PublishDomainEvent to publish domain events when the model is saved to database
+ * === AI-NOTE-END ===
+ * </pre>
  * A jdbc implementation for FooRepository
- * NOTE:
- * Use NamedJdbcTemplate and utilities in com.ikeyit.common.spring.jdbc to implement the repository
- * Use text block to store SQL
- * Use @PublishDomainEvent to publish domain events when the model is saved to database
  */
 @Repository
 public abstract class JdbcFooRepository implements FooRepository {
+    // AI-NOTE: Use static text block to define SQL if it is not dynamic
     private static final String SQL_INSERT = """
         INSERT INTO foo
-        (message, created_at, updated_at)
+        (message, source, created_at, updated_at)
         VALUES
-        (:message, :createdAt, :updatedAt)
+        (:message, :source, :createdAt, :updatedAt)
         """;
 
     private static final String SQL_FIND_BY_ID = """
@@ -48,14 +52,13 @@ public abstract class JdbcFooRepository implements FooRepository {
     private static final String SQL_UPDATE = """
         UPDATE store SET
         message=:message,
+        source=:source,
         updated_at=:updatedAt
         WHERE id=:id
         """;
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    /**
-     * For simple cases, use EnhancedRowMapper to map record back to domain model
-     */
+    // AI-NOTE: Use EnhancedRowMapper to map data. It can handle EnumWithInt fields and @JsonField fields automatically
     private final RowMapper<Foo> rowMapper = new EnhancedRowMapper<>(Foo.class);
 
     public JdbcFooRepository(@Qualifier("fooJdbcTemplate")
@@ -73,18 +76,39 @@ public abstract class JdbcFooRepository implements FooRepository {
         return jdbcTemplate.query(SQL_FIND_ALL, rowMapper);
     }
 
+    /**
+     * <pre>
+     * === AI-NOTE ===
+     * - Use @PublishDomainEvent to publish domain events when the model is saved to database
+     * === AI-NOTE-END ===
+     * </pre>
+     */
     @Override
-    @PublishDomainEvent // Add this annotation to publish domain events
+    @PublishDomainEvent
     public void create(Foo entity) {
         createWithGeneratedKey(jdbcTemplate, SQL_INSERT, entity, EnhancedSqlParameterSource::new);
     }
 
+    /**
+     * <pre>
+     * === AI-NOTE ===
+     * - Use @PublishDomainEvent to publish domain events when the model is saved to database
+     * === AI-NOTE-END ===
+     * </pre>
+     */
     @Override
     @PublishDomainEvent
     public void update(Foo entity) {
         jdbcTemplate.update(SQL_UPDATE, new EnhancedSqlParameterSource(entity));
     }
 
+    /**
+     * <pre>
+     * === AI-NOTE ===
+     * - Use @PublishDomainEvent to publish domain events when the model is saved to database
+     * === AI-NOTE-END ===
+     * </pre>
+     */
     @Override
     @PublishDomainEvent
     public void delete(Foo entity) {

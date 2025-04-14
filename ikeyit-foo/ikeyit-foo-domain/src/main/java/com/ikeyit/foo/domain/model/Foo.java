@@ -1,5 +1,6 @@
 package com.ikeyit.foo.domain.model;
 
+import com.ikeyit.common.data.JsonField;
 import com.ikeyit.common.data.domain.BaseAggregateRoot;
 import com.ikeyit.common.data.domain.ForRepo;
 import com.ikeyit.foo.domain.event.FooCreatedEvent;
@@ -9,12 +10,16 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 /**
+ * <pre>
+ * === AI-NOTE ===
+ * - Aggregate root should extend BaseAggregateRoot.
+ * - Domain model should be rich model.
+ * - Define the concrete business methods to modify the model and keep data consistency.
+ * - Do not define the setters to directly update the inner fields. It may destroy the data consistency.
+ * - Ensure the method assignId is implemented
+ * === AI-NOTE-END ===
+ * </pre>
  * Foo domain model representing a foo in the system. It's an aggregate root.
- * NOTE:
- * Aggregate root should extend BaseAggregateRoot
- * Domain model should be rich model.
- * Define the concrete business methods to modify the model and keep data consistency.
- * Do not define the setters to directly update the inner fields. It may destroy the data consistency.
  */
 public class Foo extends BaseAggregateRoot<Long> {
     private Long id;
@@ -22,6 +27,8 @@ public class Foo extends BaseAggregateRoot<Long> {
     private FooStatus status;
     private Instant createdAt;
     private Instant updatedAt;
+    @JsonField
+    private FooSource source;
 
     /**
      * This construct is used for the persistence
@@ -31,9 +38,10 @@ public class Foo extends BaseAggregateRoot<Long> {
     protected Foo() {
     }
 
-    public Foo(String message) {
+    public Foo(String message, FooSource source) {
         this.message = message;
         this.status = FooStatus.ACTIVE;
+        this.source = source;
         this.createdAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
         this.updatedAt = createdAt;
         // Generate a domain event to notify the domain model is created
@@ -62,6 +70,10 @@ public class Foo extends BaseAggregateRoot<Long> {
         return status;
     }
 
+    public FooSource getSource() {
+        return source;
+    }
+
     @Override
     public Long getId() {
         return id;
@@ -76,6 +88,10 @@ public class Foo extends BaseAggregateRoot<Long> {
     }
 
     /**
+     * <pre>
+     * # AI REMINDER
+     * Ensure this method is implemented
+     * === AI-NOTE-END ===
      * Assign an id for a new entity. It is used for the persistence
      * DO NOT use it in your business logic
      * @param id The identifier to assign

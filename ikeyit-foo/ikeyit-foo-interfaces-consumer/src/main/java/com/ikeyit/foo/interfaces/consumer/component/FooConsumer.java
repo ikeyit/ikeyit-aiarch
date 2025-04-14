@@ -10,6 +10,13 @@ import org.springframework.messaging.Message;
 import java.time.Instant;
 import java.util.function.Consumer;
 
+/**
+ * <pre>
+ * === AI-NOTE ===
+ * - This class is used to consume messages from external MQ.
+ * === AI-NOTE-END ===
+ * </pre>
+ */
 @Configuration(proxyBeanMethods = false)
 public class FooConsumer {
 

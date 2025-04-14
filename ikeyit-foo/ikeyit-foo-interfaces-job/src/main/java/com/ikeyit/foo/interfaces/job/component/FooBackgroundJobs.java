@@ -19,7 +19,7 @@ public class FooBackgroundJobs {
     }
 
     @Scheduled(fixedRate = 1, timeUnit = TimeUnit.MINUTES)
-    public void stats() {
+    public void fooStats() {
         var total = fooService.findAll().size();
         log.info("Total foo count: {}", total);
     }

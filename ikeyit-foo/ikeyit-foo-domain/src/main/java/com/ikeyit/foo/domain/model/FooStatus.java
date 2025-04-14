@@ -4,11 +4,12 @@ package com.ikeyit.foo.domain.model;
 import com.ikeyit.common.data.EnumWithInt;
 
 /**
- * Foo status enum
- * NOTE:
- * Use this boilerplate code to define enumeration type used by a domain model
- * Implement EnumWithInt.
- * Store the integer value as SMALLINT type in your database table
+ * <pre>
+ * === AI-NOTE ===
+ * - Enumeration type used by a domain model should implement the interface "EnumWithInt"
+ * - Store the integer value as SMALLINT type in your database table
+ * === AI-NOTE-END ===
+ * </pre>
  */
 public enum FooStatus implements EnumWithInt {
     DRAFT(1),
@@ -22,8 +23,9 @@ public enum FooStatus implements EnumWithInt {
         this.value = value;
     }
 
+    // # AI REMINDER
+    // Generate the static code to ensure there is no duplication
     static {
-        // Verify there are no duplicate integer values
         EnumWithInt.assertNoDuplicate(values());
     }
 

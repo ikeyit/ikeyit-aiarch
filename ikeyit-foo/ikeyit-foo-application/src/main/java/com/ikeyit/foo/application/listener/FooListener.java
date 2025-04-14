@@ -8,8 +8,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
- * Application event listeners in the application layer for internal usage.
- * These listeners will be executed in the same JVM
+ * <pre>
+ * === AI-NOTE ===
+ * - Put code in the event listeners to keep it decoupled
+ * - The listeners in the application layer are only for internal logic.
+ * - The listeners are executed in the same JVM with the event publishers.
+ * === AI-NOTE-END ===
+ * </pre>
  **/
 @Component
 public class FooListener {

@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Includes all the interfaces in one application
+ * All-in-one application to start all interfaces
  */
 @SpringBootApplication
 public class FooAllinoneApp {

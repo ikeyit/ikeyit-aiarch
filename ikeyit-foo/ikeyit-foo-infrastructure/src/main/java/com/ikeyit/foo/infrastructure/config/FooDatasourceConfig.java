@@ -1,5 +1,6 @@
 package com.ikeyit.foo.infrastructure.config;
 
+import com.ikeyit.common.data.spring.domain.JdbcDomainEventRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -12,6 +13,11 @@ import org.springframework.transaction.PlatformTransactionManager;
 import javax.sql.DataSource;
 
 /**
+ * <pre>
+ * === AI-NOTE ===
+ * - Configure a dedicated data source for the project instead of using the global or default data source.
+ * === AI-NOTE-END ===
+ * </pre>
  * Configure datasource
  */
 @Configuration(proxyBeanMethods = false)
@@ -37,5 +43,11 @@ public class FooDatasourceConfig {
     @Bean
     public PlatformTransactionManager fooTransactionManager(@Qualifier("fooDataSource") DataSource dataSource) {
         return new DataSourceTransactionManager(dataSource);
+    }
+
+    // AI-NOTE: Configure this repository to persist domain events
+    @Bean
+    public JdbcDomainEventRepository fooDomainEventRepository(@Qualifier("fooJdbcTemplate") NamedParameterJdbcTemplate fooJdbcTemplate) {
+        return new JdbcDomainEventRepository(fooJdbcTemplate);
     }
 }
