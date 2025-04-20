@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+When I share code with you, please pay special attention to any comment blocks marked with === AI-NOTE === and === AI-NOTE-END === tags, and single line comments starting with "AI-NOTE:".
+These are specific instructions for you to follow when generating or modifying code. These notes won't be part of the final code but are my guidelines for how I want you to approach the implementation.

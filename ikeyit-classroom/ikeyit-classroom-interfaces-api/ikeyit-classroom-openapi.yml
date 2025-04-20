@@ -1,0 +1,1083 @@
+openapi: 3.0.3
+info:
+  title: ikeyit Classroom API
+  description: |
+    This is the API documentation for the ikeyit Classroom system.
+    It provides endpoints for managing courses, teachers, students, class schedules, and enrollments.
+  version: 1.0.0
+  
+servers:
+  - url: http://localhost:6111/api/classroom/v1
+    description: Current server
+
+tags:
+  - name: students
+    description: Student management operations
+  - name: teachers
+    description: Teacher management operations
+  - name: courses
+    description: Course management operations
+  - name: schedules
+    description: Class schedule management operations
+  - name: enrollments
+    description: Course enrollment operations
+
+paths:
+  /students/me:
+    post:
+      tags:
+        - students
+      summary: Register student information
+      description: Register current user as a student
+      security:
+        - oauth2: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStudentCMD'
+      responses:
+        '200':
+          description: Student registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentDTO'
+    put:
+      tags:
+        - students
+      summary: Update student information
+      description: Update current user's student information
+      security:
+        - oauth2: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStudentCMD'
+      responses:
+        '200':
+          description: Student information updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentDTO'
+    get:
+      tags:
+        - students
+      summary: Get student information
+      description: Get current user's student information
+      security:
+        - oauth2: []
+      responses:
+        '200':
+          description: Student information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentDTO'
+
+  /students/{userId}:
+    get:
+      tags:
+        - students
+      summary: Get student by user ID
+      description: Get student information by user ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Student information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentDTO'
+
+  /teachers/me:
+    post:
+      tags:
+        - teachers
+      summary: Register teacher information
+      description: Register current user as a teacher
+      security:
+        - oauth2: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTeacherCMD'
+      responses:
+        '200':
+          description: Teacher registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherDTO'
+    put:
+      tags:
+        - teachers
+      summary: Update teacher information
+      description: Update current user's teacher information
+      security:
+        - oauth2: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTeacherCMD'
+      responses:
+        '200':
+          description: Teacher information updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherDTO'
+    get:
+      tags:
+        - teachers
+      summary: Get teacher information
+      description: Get current user's teacher information
+      security:
+        - oauth2: []
+      responses:
+        '200':
+          description: Teacher information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherDTO'
+
+  /teachers/{teacherUserId}:
+    get:
+      tags:
+        - teachers
+      summary: Get teacher by user ID
+      description: Get teacher information by user ID
+      parameters:
+        - name: teacherUserId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Teacher information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherDTO'
+
+  /courses:
+    post:
+      tags:
+        - courses
+      summary: Create a course
+      description: Create a new course
+      security:
+        - oauth2: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCourseCMD'
+      responses:
+        '200':
+          description: Course created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDTO'
+    get:
+      tags:
+        - courses
+      summary: Get all courses
+      description: Get a list of all courses
+      responses:
+        '200':
+          description: Courses retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseDTO'
+
+  /courses/{courseId}:
+    get:
+      tags:
+        - courses
+      summary: Get course details
+      description: Get details of a specific course
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Course details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDTO'
+    put:
+      tags:
+        - courses
+      summary: Update a course
+      description: Update an existing course
+      security:
+        - oauth2: []
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCourseCMD'
+      responses:
+        '200':
+          description: Course updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDTO'
+
+  /courses/{courseId}/publish:
+    post:
+      tags:
+        - courses
+      summary: Publish a course
+      description: Publish an existing course
+      security:
+        - oauth2: []
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublishCourseCMD'
+      responses:
+        '200':
+          description: Course published successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDTO'
+
+  /courses/{courseId}/cancel:
+    post:
+      tags:
+        - courses
+      summary: Cancel a course
+      description: Cancel an existing course
+      security:
+        - oauth2: []
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelCourseCMD'
+      responses:
+        '200':
+          description: Course cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDTO'
+
+  /teachers/me/courses:
+    get:
+      tags:
+        - courses
+      summary: Get current teacher's courses
+      description: Get a list of courses for the current teacher
+      security:
+        - oauth2: []
+      responses:
+        '200':
+          description: Courses retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseDTO'
+
+  /teachers/{teacherUserId}/courses:
+    get:
+      tags:
+        - courses
+      summary: Get teacher's courses
+      description: Get a list of courses for a specific teacher
+      parameters:
+        - name: teacherUserId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Courses retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseDTO'
+
+  /schedules:
+    post:
+      tags:
+        - schedules
+      summary: Create a class schedule
+      description: Create a new class schedule
+      security:
+        - oauth2: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClassScheduleCMD'
+      responses:
+        '200':
+          description: Class schedule created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassScheduleDTO'
+
+  /schedules/{scheduleId}:
+    get:
+      tags:
+        - schedules
+      summary: Get class schedule details
+      description: Get details of a specific class schedule
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Class schedule details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassScheduleDTO'
+    put:
+      tags:
+        - schedules
+      summary: Update a class schedule
+      description: Update an existing class schedule
+      security:
+        - oauth2: []
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateClassScheduleCMD'
+      responses:
+        '200':
+          description: Class schedule updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassScheduleDTO'
+    delete:
+      tags:
+        - schedules
+      summary: Delete a class schedule
+      description: Delete an existing class schedule
+      security:
+        - oauth2: []
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Class schedule deleted successfully
+
+  /courses/{courseId}/schedules:
+    get:
+      tags:
+        - schedules
+      summary: Get course schedules
+      description: Get a list of class schedules for a specific course
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Class schedules retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClassScheduleDTO'
+
+  /enrollments:
+    post:
+      tags:
+        - enrollments
+      summary: Enroll in a course
+      description: Student enrolls in a course
+      security:
+        - oauth2: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnrollCourseCMD'
+      responses:
+        '200':
+          description: Enrolled in course successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentDTO'
+
+  /enrollments/{enrollmentId}:
+    get:
+      tags:
+        - enrollments
+      summary: Get enrollment details
+      description: Get details of a specific enrollment
+      parameters:
+        - name: enrollmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Enrollment details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentDTO'
+
+  /enrollments/{enrollmentId}/approve:
+    post:
+      tags:
+        - enrollments
+      summary: Approve an enrollment
+      description: Teacher approves a student's enrollment
+      security:
+        - oauth2: []
+      parameters:
+        - name: enrollmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Enrollment approved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentDTO'
+
+  /enrollments/{enrollmentId}/reject:
+    post:
+      tags:
+        - enrollments
+      summary: Reject an enrollment
+      description: Teacher rejects a student's enrollment
+      security:
+        - oauth2: []
+      parameters:
+        - name: enrollmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Enrollment rejected successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentDTO'
+
+  /enrollments/{enrollmentId}/cancel:
+    post:
+      tags:
+        - enrollments
+      summary: Cancel an enrollment
+      description: Student cancels their enrollment
+      security:
+        - oauth2: []
+      parameters:
+        - name: enrollmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Enrollment cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentDTO'
+
+  /students/me/enrollments:
+    get:
+      tags:
+        - enrollments
+      summary: Get current student's enrollments
+      description: Get a list of enrollments for the current student
+      security:
+        - oauth2: []
+      responses:
+        '200':
+          description: Enrollments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EnrollmentDTO'
+
+  /students/{studentUserId}/enrollments:
+    get:
+      tags:
+        - enrollments
+      summary: Get student's enrollments
+      description: Get a list of enrollments for a specific student
+      parameters:
+        - name: studentUserId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Enrollments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EnrollmentDTO'
+
+  /courses/{courseId}/enrollments:
+    get:
+      tags:
+        - enrollments
+      summary: Get course enrollments
+      description: Get a list of enrollments for a specific course
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Enrollments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EnrollmentDTO'
+
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: /oauth2/authorize
+          tokenUrl: /oauth2/token
+          scopes: {}
+
+  schemas:
+    CreateStudentCMD:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+          description: User ID of the student
+        name:
+          type: string
+          description: Name of the student
+        studentNo:
+          type: string
+          description: Student number
+        faculty:
+          type: string
+          description: Faculty of the student
+        className:
+          type: string
+          description: Class name of the student
+
+    UpdateStudentCMD:
+      type: object
+      properties:
+        operatorId:
+          type: integer
+          format: int64
+          description: ID of the user performing the operation
+        name:
+          type: string
+          description: Name of the student
+        faculty:
+          type: string
+          description: Faculty of the student
+        className:
+          type: string
+          description: Class name of the student
+
+    StudentDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID of the student
+        userId:
+          type: integer
+          format: int64
+          description: User ID of the student
+        name:
+          type: string
+          description: Name of the student
+        studentNo:
+          type: string
+          description: Student number
+        faculty:
+          type: string
+          description: Faculty of the student
+        className:
+          type: string
+          description: Class name of the student
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update time
+
+    CreateTeacherCMD:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+          description: User ID of the teacher
+        name:
+          type: string
+          description: Name of the teacher
+        faculty:
+          type: string
+          description: Faculty of the teacher
+        title:
+          type: string
+          description: Title of the teacher
+
+    UpdateTeacherCMD:
+      type: object
+      properties:
+        operatorId:
+          type: integer
+          format: int64
+          description: ID of the user performing the operation
+        name:
+          type: string
+          description: Name of the teacher
+        faculty:
+          type: string
+          description: Faculty of the teacher
+        title:
+          type: string
+          description: Title of the teacher
+
+    TeacherDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID of the teacher
+        userId:
+          type: integer
+          format: int64
+          description: User ID of the teacher
+        name:
+          type: string
+          description: Name of the teacher
+        faculty:
+          type: string
+          description: Faculty of the teacher
+        title:
+          type: string
+          description: Title of the teacher
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update time
+
+    CreateCourseCMD:
+      type: object
+      properties:
+        teacherUserId:
+          type: integer
+          format: int64
+          description: User ID of the teacher
+        name:
+          type: string
+          description: Name of the course
+        description:
+          type: string
+          description: Description of the course
+        imageUrl:
+          type: string
+          description: URL of the course image
+        credits:
+          type: integer
+          format: int32
+          description: Credits for the course
+        startDate:
+          type: string
+          format: date-time
+          description: Start date of the course
+        endDate:
+          type: string
+          format: date-time
+          description: End date of the course
+
+    UpdateCourseCMD:
+      type: object
+      properties:
+        operatorId:
+          type: integer
+          format: int64
+          description: ID of the user performing the operation
+        courseId:
+          type: integer
+          format: int64
+          description: ID of the course
+        name:
+          type: string
+          description: Name of the course
+        description:
+          type: string
+          description: Description of the course
+        imageUrl:
+          type: string
+          description: URL of the course image
+        credits:
+          type: integer
+          format: int32
+          description: Credits for the course
+        startDate:
+          type: string
+          format: date-time
+          description: Start date of the course
+        endDate:
+          type: string
+          format: date-time
+          description: End date of the course
+
+    PublishCourseCMD:
+      type: object
+      properties:
+        operatorId:
+          type: integer
+          format: int64
+          description: ID of the user performing the operation
+        courseId:
+          type: integer
+          format: int64
+          description: ID of the course
+
+    CancelCourseCMD:
+      type: object
+      properties:
+        operatorId:
+          type: integer
+          format: int64
+          description: ID of the user performing the operation
+        courseId:
+          type: integer
+          format: int64
+          description: ID of the course
+
+    CourseDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID of the course
+        name:
+          type: string
+          description: Name of the course
+        description:
+          type: string
+          description: Description of the course
+        imageUrl:
+          type: string
+          description: URL of the course image
+        credits:
+          type: integer
+          format: int32
+          description: Credits for the course
+        teacherUserId:
+          type: integer
+          format: int64
+          description: User ID of the teacher
+        startDate:
+          type: string
+          format: date-time
+          description: Start date of the course
+        endDate:
+          type: string
+          format: date-time
+          description: End date of the course
+        status:
+          type: string
+          enum: [DRAFT, PUBLISHED, CANCELLED]
+          description: Status of the course
+        teacher:
+          $ref: '#/components/schemas/TeacherDTO'
+          description: Teacher information
+
+    CreateClassScheduleCMD:
+      type: object
+      properties:
+        operatorId:
+          type: integer
+          format: int64
+          description: ID of the user performing the operation
+        courseId:
+          type: integer
+          format: int64
+          description: ID of the course
+        classroom:
+          type: string
+          description: Classroom location
+        startTime:
+          type: string
+          format: date-time
+          description: Start time of the class
+        endTime:
+          type: string
+          format: date-time
+          description: End time of the class
+
+    UpdateClassScheduleCMD:
+      type: object
+      properties:
+        operatorId:
+          type: integer
+          format: int64
+          description: ID of the user performing the operation
+        classScheduleId:
+          type: integer
+          format: int64
+          description: ID of the class schedule
+        classroom:
+          type: string
+          description: Classroom location
+        startTime:
+          type: string
+          format: date-time
+          description: Start time of the class
+        endTime:
+          type: string
+          format: date-time
+          description: End time of the class
+
+    DeleteClassScheduleCMD:
+      type: object
+      properties:
+        operatorId:
+          type: integer
+          format: int64
+          description: ID of the user performing the operation
+        classScheduleId:
+          type: integer
+          format: int64
+          description: ID of the class schedule
+
+    ClassScheduleDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID of the class schedule
+        courseId:
+          type: integer
+          format: int64
+          description: ID of the course
+        classroom:
+          type: string
+          description: Classroom location
+        startTime:
+          type: string
+          format: date-time
+          description: Start time of the class
+        endTime:
+          type: string
+          format: date-time
+          description: End time of the class
+
+    EnrollCourseCMD:
+      type: object
+      properties:
+        studentUserId:
+          type: integer
+          format: int64
+          description: User ID of the student
+        courseId:
+          type: integer
+          format: int64
+          description: ID of the course
+
+    ApproveEnrollmentCMD:
+      type: object
+      properties:
+        operatorId:
+          type: integer
+          format: int64
+          description: ID of the user performing the operation
+        enrollmentId:
+          type: integer
+          format: int64
+          description: ID of the enrollment
+
+    RejectEnrollmentCMD:
+      type: object
+      properties:
+        operatorId:
+          type: integer
+          format: int64
+          description: ID of the user performing the operation
+        enrollmentId:
+          type: integer
+          format: int64
+          description: ID of the enrollment
+
+    CancelEnrollmentCMD:
+      type: object
+      properties:
+        operatorId:
+          type: integer
+          format: int64
+          description: ID of the user performing the operation
+        enrollmentId:
+          type: integer
+          format: int64
+          description: ID of the enrollment
+
+    EnrollmentDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID of the enrollment
+        studentId:
+          type: integer
+          format: int64
+          description: ID of the student
+        studentUserId:
+          type: integer
+          format: int64
+          description: User ID of the student
+        studentName:
+          type: string
+          description: Name of the student
+        courseId:
+          type: integer
+          format: int64
+          description: ID of the course
+        courseName:
+          type: string
+          description: Name of the course
+        status:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED, CANCELLED]
+          description: Status of the enrollment
+        createTime:
+          type: string
+          format: date-time
+          description: Time when the enrollment was created
+        updateTime:
+          type: string
+          format: date-time
+          description: Time when the enrollment was last updated
