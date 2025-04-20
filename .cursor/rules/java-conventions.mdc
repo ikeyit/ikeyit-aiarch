@@ -10,6 +10,7 @@ General Caveats
 - Use SLF4J as the logger
 - Use [BizAssert.java](mdc:ikeyit-common/ikeyit-common-exception/src/main/java/com/ikeyit/common/exception/BizAssert.java) to validate business logic
 - The enumeration types used in the domain model should implement the EnumWithInt interface @EnumWithInt.java. Use the int value rather than string to store the enum.
+- Use java.time.Instant to represent the timestamp and truncate it to ChronoUnit.MILLIS, e.g. the start time and end time of a task, when an event happens
 
 Naming Conventions
 - Use PascalCase for class names
