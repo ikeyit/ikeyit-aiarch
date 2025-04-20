@@ -194,7 +194,7 @@ public class BizAssert {
      * @param args The message format arguments
      * @throws BizException if the string is null or empty
      */
-    public static void hasLength(@Nullable String str, ErrorCode errorCode, MessageKey messageKey, String message, Object... args) {
+    public static void notEmpty(@Nullable String str, ErrorCode errorCode, MessageKey messageKey, String message, Object... args) {
         if (str == null || str.isEmpty()) {
             throw new BizException(errorCode, messageKey, message, args);
         }
@@ -208,7 +208,7 @@ public class BizAssert {
      * @param args The message format arguments
      * @throws BizException if the string is null or empty
      */
-    public static void hasLength(@Nullable String str, ErrorCode errorCode, String message, Object... args) {
+    public static void notEmpty(@Nullable String str, ErrorCode errorCode, String message, Object... args) {
         if (str == null || str.isEmpty()) {
             throw new BizException(errorCode, message, args);
         }
@@ -222,7 +222,7 @@ public class BizAssert {
      * @param args The message format arguments
      * @throws BizException if the string is null or empty with INVALID_ARGUMENT error code
      */
-    public static void hasLength(@Nullable String str, MessageKey messageKey, String message, Object... args) {
+    public static void notEmpty(@Nullable String str, MessageKey messageKey, String message, Object... args) {
         if (str == null || str.isEmpty()) {
             throw new BizException(CommonErrorCode.INVALID_ARGUMENT, messageKey, message, args);
         }
@@ -235,7 +235,7 @@ public class BizAssert {
      * @param args The message format arguments
      * @throws BizException if the string is null or empty with INVALID_ARGUMENT error code
      */
-    public static void hasLength(@Nullable String str, String message, Object... args) {
+    public static void notEmpty(@Nullable String str, String message, Object... args) {
         if (str == null || str.isEmpty()) {
             throw new BizException(CommonErrorCode.INVALID_ARGUMENT, message, args);
         }
