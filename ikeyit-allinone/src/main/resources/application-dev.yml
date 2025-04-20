@@ -1,0 +1,126 @@
+logging:
+  level:
+    com.ikeyit: debug
+    org.springframework.security: debug
+spring:
+  config:
+    # Create your application.yml in the following folder to overwrite the properties
+    import: "optional:file:${user.home}/ikeyit-config/ikeyit-allinone/"
+  # Configure the database
+  datasource:
+    account:
+      url: jdbc:postgresql://postgresql-server:5432/account?currentSchema=public&stringtype=unspecified
+      username: ikeyit
+      password: dev_pass
+    classroom:
+      url: jdbc:postgresql://postgresql-server:5432/classroom?currentSchema=public&stringtype=unspecified
+      username: ikeyit
+      password: dev_pass
+  data:
+    # Configure the redis server
+    redis:
+      host: redis-server
+      port: 6379
+  # Configure object storage service. e.g. amazon s3
+  blobstore:
+    account:
+      region: us-east-2
+      endpoint: https://s3.us-east-2.amazonaws.com
+      accessKey: access key
+      secretKey: secret key
+      bucket: bucket name
+      cdnUrl: your cdn url for s3 storage
+  security:
+    oauth2:
+      # Configure social login
+      client:
+        registration:
+          google:
+            client-id: your client id
+            client-secret: your client secret
+            scope: openid, email, profile
+            redirect-uri: "{baseUrl}/auth/oauth2/code/{registrationId}"
+        provider:
+          google:
+            issuer-uri: https://accounts.google.com
+      # Configure the authorizationserver to enable SSO for the other systems
+      authorizationserver:
+        # replace with your JWK set file
+        jwk-set-file: ${user.home}/ikeyit-config/ikeyit-allinone/jwks.json
+        # Configure the clients. TODO Store the clients in database
+        client:
+          store-web-client:
+            registration:
+              client-id: store-web-client
+              client-authentication-methods:
+                - none
+              authorization-grant-types:
+                - authorization_code
+                - refresh_token
+              redirect-uris:
+                - http://localhost:5173/callback
+              post-logout-redirect-uris:
+                - http://localhost:5173
+              scopes:
+                - openid
+                - profile
+                - email
+                - roles
+                - offline_access
+            token:
+              access-token-time-to-live: 60m
+              refresh-token-time-to-live: 360m
+              reuse-refresh-tokens: false
+            require-authorization-consent: false
+            require-proof-key: true
+          library-system:
+            registration:
+              client-id: library-system
+              client-secret: "{noop}library-system"
+              client-authentication-methods:
+                - client_secret_post
+              authorization-grant-types:
+                - authorization_code
+                - refresh_token
+              redirect-uris:
+                - http://localhost:3000/api/auth/callback/oidc
+              scopes:
+                - openid
+                - profile
+                - email
+                - roles
+            token:
+              access-token-time-to-live: 60m
+              refresh-token-time-to-live: 360m
+              reuse-refresh-tokens: false
+            require-authorization-consent: false
+            require-proof-key: true
+          ikeyit-classroom-ios:
+            registration:
+              client-id: ikeyit-classroom-ios
+              client-authentication-methods:
+                - none
+              authorization-grant-types:
+                - authorization_code
+                - refresh_token
+              redirect-uris:
+                - com.ikeyit.Classroom:/oauth2redirect
+              post-logout-redirect-uris:
+                - com.ikeyit.Classroom:/oauth2logout
+              scopes:
+                - openid
+                - profile
+                - email
+                - roles
+                - offline_access
+            token:
+              access-token-time-to-live: 1m
+              refresh-token-time-to-live: 7d
+              reuse-refresh-tokens: false
+            require-authorization-consent: false
+            require-proof-key: true
+      resourceserver:
+        jwt:
+#          jwk-set-uri: real authorization server jwks endpoint
+#          this is only for dev
+          jwk-set-file: ${user.home}/ikeyit-config/ikeyit-allinone/jwks-public.json

@@ -4,17 +4,22 @@ import com.ikeyit.account.infrastructure.security.codeauth.CustomCodeAuthUserSer
 import com.ikeyit.account.infrastructure.security.codeauth.LoginVerificationCodeService;
 import com.ikeyit.account.infrastructure.security.oidc.CustomOidcUserService;
 import com.ikeyit.account.interfaces.api.auth.*;
-import com.ikeyit.account.interfaces.api.auth.oidc.PopupOidcAuthenticationSuccessHandler;
+import com.ikeyit.account.interfaces.api.auth.authsession.*;
+import com.ikeyit.account.interfaces.api.auth.oidc.CookieAuthorizationRequestRepository;
+import com.ikeyit.account.interfaces.api.auth.oidc.OidcLoginExtraAuthenticationResultConverter;
+import com.ikeyit.account.interfaces.api.auth.oidc.OidcLoginExtraAuthorizationRequestCustomizer;
+import com.ikeyit.account.interfaces.api.auth.oidc.OidcLoginRedirectAuthenticationSuccessHandler;
 import com.ikeyit.security.codeauth.web.VerificationCodeAuthenticationConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.ObjectPostProcessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -22,20 +27,22 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.servlet.LocaleResolver;
+
+import static com.ikeyit.account.interfaces.api.config.AccountApiProperties.*;
 
 /**
  * Basic security configuration, including api protection, password and verification authentication
@@ -44,9 +51,8 @@ import org.springframework.web.servlet.LocaleResolver;
 @EnableWebSecurity
 public class AccountSecurityConfig {
     private final static MediaTypeRequestMatcher JSON_REQUEST_MATCHER = new MediaTypeRequestMatcher(MediaType.APPLICATION_JSON);
-    private final static MediaTypeRequestMatcher HTML_REQUEST_MATCHER = new MediaTypeRequestMatcher(MediaType.TEXT_HTML);
-    private final static RequestMatcher ALL_MATCHER = request -> true;
-    private final String loginUrl = "/login";
+
+
     static {
         JSON_REQUEST_MATCHER.setUseEquals(true);
     }
@@ -56,33 +62,22 @@ public class AccountSecurityConfig {
      */
     @Bean
     public AuthenticationFailureHandler authenticationFailureHandler() {
-        var authenticationFailureHandler = new CompositeAuthenticationFailureHandler();
         // Response a failure json if the request expects json
         var jsonAuthenticationFailureHandler = new JsonAuthenticationFailureHandler();
-        authenticationFailureHandler.addAuthenticationFailureHandler(jsonAuthenticationFailureHandler, JSON_REQUEST_MATCHER);
         // Response a redirect to login if the request expects html. Generally the request is sent by browser.
-        var redirectAuthenticationFailureHandler = new RedirectAuthenticationFailureHandler(loginUrl);
-        authenticationFailureHandler.addAuthenticationFailureHandler(redirectAuthenticationFailureHandler, HTML_REQUEST_MATCHER);
-        return authenticationFailureHandler;
+        var redirectAuthenticationFailureHandler = new RedirectAuthenticationFailureHandler(LOGIN_PAGE_URL);
+        return (request, response, authentication) -> {
+            if (JSON_REQUEST_MATCHER.matches(request)) {
+                jsonAuthenticationFailureHandler.onAuthenticationFailure(request, response, authentication);
+            } else {
+                redirectAuthenticationFailureHandler.onAuthenticationFailure(request, response, authentication);
+            }
+        };
     }
 
-    /**
-     * Handle the logic after users login successfully
-     */
     @Bean
-    public AuthenticationSuccessHandler authenticationSuccessHandler(LocaleResolver localeResolver) {
-        var authenticationSuccessHandler = new CompositeAuthenticationSuccessHandler();
-        // Response a success json if the request expects json
-        var jsonAuthenticationSuccessHandler = new JsonAuthenticationSuccessHandler();
-        authenticationSuccessHandler.addAuthenticationSuccessHandler(jsonAuthenticationSuccessHandler, JSON_REQUEST_MATCHER);
-        // Response a redirect to a target url if the request expects html. Generally the request is sent by browser.
-        var simpleUrlAuthenticationSuccessHandler = new SimpleUrlAuthenticationSuccessHandler("/");
-        simpleUrlAuthenticationSuccessHandler.setTargetUrlParameter("redirect");
-        authenticationSuccessHandler.addAuthenticationSuccessHandler(simpleUrlAuthenticationSuccessHandler, HTML_REQUEST_MATCHER);
-        // Set the user preferred locale in the cookie after login successfully
-        var localeAuthenticationSuccessHandler = new LocaleAuthenticationSuccessHandler(localeResolver);
-        authenticationSuccessHandler.addAuthenticationSuccessHandler(localeAuthenticationSuccessHandler, ALL_MATCHER);
-        return authenticationSuccessHandler;
+    public AccessDeniedHandler accessDeniedHandler() {
+        return new JsonAccessDeniedHandler();
     }
 
     /**
@@ -90,15 +85,18 @@ public class AccountSecurityConfig {
      */
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint() {
-        var authenticationEntryPoint = new CompositeAuthenticationEntryPoint();
         // If the client expects json, return a json with error message
         var jsonAuthenticationEntryPoint = new JsonAuthenticationEntryPoint();
-        authenticationEntryPoint.addAuthenticationEntryPoint(jsonAuthenticationEntryPoint, JSON_REQUEST_MATCHER);
         // If the client expects html, meaning the client is browser, redirect the request to login
-        var loginUrlAuthenticationEntryPoint = new RedirectAuthenticationEntryPoint(loginUrl);
+        var loginUrlAuthenticationEntryPoint = new RedirectAuthenticationEntryPoint(LOGIN_PAGE_URL);
         loginUrlAuthenticationEntryPoint.setRedirectParameter("redirect");
-        authenticationEntryPoint.addAuthenticationEntryPoint(loginUrlAuthenticationEntryPoint, HTML_REQUEST_MATCHER);
-        return authenticationEntryPoint;
+        return (request, response, authentication) -> {
+            if (JSON_REQUEST_MATCHER.matches(request)) {
+                jsonAuthenticationEntryPoint.commence(request, response, authentication);
+            } else {
+                loginUrlAuthenticationEntryPoint.commence(request, response, authentication);
+            }
+        };
     }
 
     /**
@@ -110,14 +108,6 @@ public class AccountSecurityConfig {
     }
 
     /**
-     * Store security context in session
-     */
-    @Bean
-    public SecurityContextRepository securityContextRepository() {
-        return new HttpSessionSecurityContextRepository();
-    }
-
-    /**
      * How to encode the password
      */
     @Bean
@@ -125,67 +115,136 @@ public class AccountSecurityConfig {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
+    @Bean
+    public AuthenticationSuccessHandler loginSuccessHandler(
+        AuthSessionService authSessionService,
+        AuthTokenGenerator authTokenGenerator,
+        AuthTokenCookieRepository authTokenCookieRepository,
+        LocaleResolver localeResolver
+    ) {
+        var loginAuthenticationSuccessHandler = new LoginAuthenticationSuccessHandler(
+            authSessionService,
+            authTokenGenerator,
+            authTokenCookieRepository);
+        var localeAuthenticationSuccessHandler = new LocaleAuthenticationSuccessHandler(localeResolver);
+        return (request, response, authentication) -> {
+            loginAuthenticationSuccessHandler.onAuthenticationSuccess(request, response, authentication);
+            localeAuthenticationSuccessHandler.onAuthenticationSuccess(request, response, authentication);
+        };
+    }
+
+    @Bean
+    public LogoutHandler logoutHandler(
+        AuthSessionService authSessionService,
+        AuthTokenCookieRepository authTokenCookieRepository
+    ) {
+        return new AuthSessionLogoutHandler(authSessionService, authTokenCookieRepository);
+    }
     /**
      * Configure security filter chain for auth related endpoints
      */
     @Bean
-    @Order(2)
-    public SecurityFilterChain accountDefaultSecurityFilterChain(HttpSecurity http,
-                                                                 CsrfTokenRepository csrfTokenRepository,
-                                                                 SecurityContextRepository securityContextRepository,
-                                                                 AuthenticationEntryPoint authenticationEntryPoint,
-                                                                 AuthenticationSuccessHandler authenticationSuccessHandler,
-                                                                 AuthenticationFailureHandler authenticationFailureHandler,
-                                                                 CustomCodeAuthUserService codeAuthUserService,
-                                                                 LoginVerificationCodeService loginVerificationCodeService,
-                                                                 @Autowired(required = false)
-                                                                 ClientRegistrationRepository clientRegistrationRepository,
-                                                                 CustomOidcUserService oidcUserService,
-                                                                 @Autowired(required = false)
-                                                                 RememberMeServices rememberMeServices
-                                                                 ) throws Exception {
-        http.securityMatcher("/auth/**")
+    public SecurityFilterChain accountDefaultSecurityFilterChain(
+        HttpSecurity http,
+        CsrfTokenRepository csrfTokenRepository,
+        AuthenticationSuccessHandler loginSuccessHandler,
+        LogoutHandler logoutHandler,
+        AuthenticationEntryPoint authenticationEntryPoint,
+        AuthenticationFailureHandler authenticationFailureHandler,
+        AccessDeniedHandler accessDeniedHandler,
+        @Qualifier("authSessionAuthenticationManager")
+        AuthenticationManager authSessionAuthenticationManager,
+        AuthTokenCookieRepository authTokenCookieRepository,
+        CustomCodeAuthUserService codeAuthUserService,
+        LoginVerificationCodeService loginVerificationCodeService,
+        @Autowired(required = false)
+        ClientRegistrationRepository clientRegistrationRepository,
+        CustomOidcUserService oidcUserService
+    ) throws Exception {
+        var jsonAuthenticationSuccessHandler = new JsonAuthenticationSuccessHandler();
+        var simpleUrlAuthenticationSuccessHandler = new SimpleUrlAuthenticationSuccessHandler("/");
+        simpleUrlAuthenticationSuccessHandler.setTargetUrlParameter("redirect");
+        var oidcLoginRedirectAuthenticationSuccessHandler = new OidcLoginRedirectAuthenticationSuccessHandler();
+        AuthenticationSuccessHandler authenticationSuccessHandler = (request, response, authentication) -> {
+            loginSuccessHandler.onAuthenticationSuccess(request, response, authentication);
+            if (JSON_REQUEST_MATCHER.matches(request)) {
+                jsonAuthenticationSuccessHandler.onAuthenticationSuccess(request, response, authentication);
+            } else {
+                simpleUrlAuthenticationSuccessHandler.onAuthenticationSuccess(request, response, authentication);
+            }
+        };
+
+        AuthenticationSuccessHandler oidcLoginAuthenticationSuccessHandler = (request, response, authentication) -> {
+            loginSuccessHandler.onAuthenticationSuccess(request, response, authentication);
+            oidcLoginRedirectAuthenticationSuccessHandler.onAuthenticationSuccess(request, response, authentication);
+        };
+
+        http.securityMatcher(AUTH_BASE_RUL + "/**")
             .authorizeHttpRequests((authorize) -> authorize
-                .requestMatchers("/auth/signup/**")
-                .permitAll()
                 .anyRequest()
                 .authenticated()
             )
-            .securityContext(c->c.securityContextRepository(securityContextRepository))
+            .securityContext(AbstractHttpConfigurer::disable) // we do not save security context to any session or storage.
+            .sessionManagement(AbstractHttpConfigurer::disable)
             .csrf(c -> c.csrfTokenRepository(csrfTokenRepository))
             .formLogin(c -> c
-                .loginPage(loginUrl)
-                .loginProcessingUrl("/auth/login")
+                .loginPage(LOGIN_PAGE_URL)
+                .loginProcessingUrl(AUTH_BASE_RUL + "/login")
                 .successHandler(authenticationSuccessHandler)
                 .failureHandler(authenticationFailureHandler)
             )
-            .logout(c -> c.logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout", HttpMethod.GET.name())))
+            .logout(c -> c
+                .logoutRequestMatcher(new AntPathRequestMatcher(AUTH_BASE_RUL + "/logout", HttpMethod.GET.name()))
+                .addLogoutHandler(logoutHandler)
+            )
             .with(new VerificationCodeAuthenticationConfigurer<>(), c -> c
-                .sendCodeUrl("/auth/send-code")
-                .loginUrl("/auth/verify-code")
+                .sendCodeUrl(AUTH_BASE_RUL + "/send-code")
+                .loginUrl(AUTH_BASE_RUL + "/verify-code")
                 .codeUserService(codeAuthUserService)
                 .verificationCodeService(loginVerificationCodeService)
                 .successHandler(authenticationSuccessHandler)
                 .failureHandler(authenticationFailureHandler)
             )
             // Handle the logic if a user requests an endpoint without permissions
-            .exceptionHandling(c -> c.authenticationEntryPoint(authenticationEntryPoint))
+            .exceptionHandling(c -> c
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler)
+            )
             // Disable request cache. We use query parameter
             .requestCache(AbstractHttpConfigurer::disable)
             // Disable anonymous user
             .anonymous(AbstractHttpConfigurer::disable)
-            // Disable remember me.
             .rememberMe(AbstractHttpConfigurer::disable)
-            .httpBasic(AbstractHttpConfigurer::disable);
-        if (rememberMeServices != null) {
-            http.rememberMe(c -> c.rememberMeServices(rememberMeServices));
-        }
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .with(new AuthSessionConfigurer<>(), c -> c
+                .authTokenCookieRepository(authTokenCookieRepository)
+                .authenticationManager(authSessionAuthenticationManager)
+            );
+
         if (clientRegistrationRepository != null) {
+            var authorizationRequestResolver = new DefaultOAuth2AuthorizationRequestResolver(
+                clientRegistrationRepository,
+                AUTH_BASE_RUL + "/authorization");
+            // make oauth2 login callback able to redirect the original url
+            authorizationRequestResolver.setAuthorizationRequestCustomizer(new OidcLoginExtraAuthorizationRequestCustomizer());
             http.oauth2Login(c -> c
-                .successHandler(new PopupOidcAuthenticationSuccessHandler())
+                .withObjectPostProcessor(
+                    new ObjectPostProcessor<OAuth2LoginAuthenticationFilter>() {
+                        @Override
+                        public <O extends OAuth2LoginAuthenticationFilter> O postProcess(O object) {
+                            object.setAuthenticationResultConverter(new OidcLoginExtraAuthenticationResultConverter());
+                            return object;
+                        }
+                    })
+                .successHandler(oidcLoginAuthenticationSuccessHandler)
                 .userInfoEndpoint(user -> user.oidcUserService(oidcUserService))
-                .loginProcessingUrl("/auth/oauth2/code/*")
-                .authorizationEndpoint(a -> a.baseUri("/auth/authorization"))
+                // Callback redirected back by the IDP with authorization code
+                .loginProcessingUrl(AUTH_BASE_RUL + "/oauth2/code/*")
+                .authorizationEndpoint(a -> a
+                    // Construct oidc authorization url for the IDP
+                    .authorizationRequestRepository(new CookieAuthorizationRequestRepository())
+                    .authorizationRequestResolver(authorizationRequestResolver)
+                )
             );
         }
         return http.build();
@@ -195,33 +254,47 @@ public class AccountSecurityConfig {
      * Configure for api related endpoints
      */
     @Bean
-    @Order(3)
-    public SecurityFilterChain accountApiSecurityFilterChain(HttpSecurity http,
-                                                      CsrfTokenRepository csrfTokenRepository,
-                                                      SecurityContextRepository securityContextRepository,
-                                                      AuthenticationEntryPoint authenticationEntryPoint) throws Exception {
+    public SecurityFilterChain accountApiSecurityFilterChain(
+        HttpSecurity http,
+        CsrfTokenRepository csrfTokenRepository,
+        AuthenticationEntryPoint authenticationEntryPoint,
+        AccessDeniedHandler accessDeniedHandler,
+        @Qualifier("authSessionAuthenticationManager")
+        AuthenticationManager authSessionAuthenticationManager,
+        AuthTokenCookieRepository authTokenCookieRepository
+    ) throws Exception {
         http
-            .securityMatcher("/api/**")
+            .securityMatcher(API_BASE_URL + "/**")
             .authorizeHttpRequests(c -> c
-                    .requestMatchers("/api/session", "/api/oidc-providers")
-                    .permitAll()
-                    .anyRequest()
-                    .authenticated())
-            .securityContext(c->c.securityContextRepository(securityContextRepository))
+                .requestMatchers(
+                    API_BASE_URL + "/signup/**",
+                    API_BASE_URL + "/session",
+                    API_BASE_URL + "/oidc-providers")
+                .permitAll()
+                .anyRequest()
+                .authenticated())
+            .securityContext(AbstractHttpConfigurer::disable)
+            .sessionManagement(AbstractHttpConfigurer::disable)
             .csrf(c -> c.csrfTokenRepository(csrfTokenRepository))
             // Disable useless filter to improve performance
             .requestCache(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
             .logout(AbstractHttpConfigurer::disable)
-            .rememberMe(AbstractHttpConfigurer::disable)
             .anonymous(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
-            .exceptionHandling(c -> c.authenticationEntryPoint(authenticationEntryPoint));
+            .with(new AuthSessionConfigurer<>(), c -> c
+                .authTokenCookieRepository(authTokenCookieRepository)
+                .authenticationManager(authSessionAuthenticationManager)
+            )
+            .exceptionHandling(c -> c
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler)
+            );
         return http.build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(
+    public AuthenticationManager passwordAuthenticationManager(
         UserDetailsService userDetailsService,
         PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();

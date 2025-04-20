@@ -1,10 +1,14 @@
 package com.ikeyit.account.interfaces.api.auth.jackson;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-@JsonDeserialize(using = UserPrincipalDeserializer.class)
-@JsonSerialize(using = UserPrincipalSerializer.class)
+import java.util.Set;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 abstract class UserPrincipalMixin {
 
+    @JsonIgnore
+    abstract Set<SimpleGrantedAuthority> getAuthorities();
 }

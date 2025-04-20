@@ -11,7 +11,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.security:spring-security-oauth2-authorization-server")
+    implementation("org.springframework.security:spring-security-oauth2-resource-server")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-    implementation("org.springframework.session:spring-session-data-redis")
     implementation("com.nimbusds:nimbus-jose-jwt")
 } 

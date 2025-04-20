@@ -33,14 +33,14 @@ public class DefaultContactInfoValidator implements ContactInfoValidator {
     
     @Override
     public void validateEmail(String email) throws BizException {
-        BizAssert.hasLength(email, "Email must not be empty");
+        BizAssert.notEmpty(email, "Email must not be empty");
         BizAssert.isTrue(EMAIL_REGEX.matcher(email).matches(), 
                 "Invalid email format. Please provide a valid email address.");
     }
     
     @Override
     public void validatePhone(String phone) throws BizException {
-        BizAssert.hasLength(phone, "Phone number must not be empty");
+        BizAssert.notEmpty(phone, "Phone number must not be empty");
         // Ensure the phone number starts with a plus sign for international format
         BizAssert.isTrue(phone.startsWith("+"),
                 "Phone number must be in international format starting with '+' followed by country code");

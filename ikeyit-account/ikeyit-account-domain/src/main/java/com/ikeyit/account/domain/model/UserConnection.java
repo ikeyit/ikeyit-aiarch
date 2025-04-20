@@ -34,7 +34,7 @@ public class UserConnection extends BaseAggregateRoot<Long> {
 		email = builder.email;
 		phoneNumber = builder.phoneNumber;
 		preferredUsername = builder.preferredUsername;
-		createdAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
+		createdAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 		updatedAt = this.createdAt;
 	}
 

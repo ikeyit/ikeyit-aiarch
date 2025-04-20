@@ -1,6 +1,7 @@
 package com.ikeyit.account.application.service;
 
 
+import com.ikeyit.account.application.assembler.UserAssembler;
 import com.ikeyit.account.application.model.*;
 import com.ikeyit.account.domain.model.User;
 import com.ikeyit.account.domain.repository.UserRepository;
@@ -43,10 +44,10 @@ public class UserService {
 
     private final VerificationCodeService updatePhoneVerificationCodeService;
 
-    private final UserDtoBuilder userDtoBuilder;
+    private final UserAssembler userAssembler;
 
     public UserService(UserRepository userRepository,
-                       UserDtoBuilder userDtoBuilder,
+                       UserAssembler userAssembler,
                        PasswordEncoder passwordEncoder,
                        PasswordValidator passwordValidator,
                        ContactInfoValidator contactInfoValidator,
@@ -59,7 +60,7 @@ public class UserService {
                        @Qualifier("updatePhoneVerificationCodeService")
                        VerificationCodeService updatePhoneVerificationCodeService) {
         this.userRepository = userRepository;
-        this.userDtoBuilder = userDtoBuilder;
+        this.userAssembler = userAssembler;
         this.passwordEncoder = passwordEncoder;
         this.passwordValidator = passwordValidator;
         this.contactInfoValidator = contactInfoValidator;
@@ -71,32 +72,32 @@ public class UserService {
 
     public UserDTO getUser(Long userId) {
         User user = getExistingUser(userId);
-        return userDtoBuilder.buildUserDTO(user);
+        return userAssembler.toUserDTO(user);
     }
 
     public UserAuthDTO loadUserAuth(Long userId) {
         BizAssert.notNull(userId, "userId must not be null");
         return userRepository.findById(userId)
-            .map(userDtoBuilder::buildUserAuthDTO)
+            .map(userAssembler::toUserAuthDTO)
             .orElseThrow(BizAssert.failSupplier("User is not found!"));
     }
 
     public UserAuthDTO loadUserAuth(String username) {
-        BizAssert.hasLength(username, "username is required");
+        BizAssert.notEmpty(username, "username is required");
         // if username is an email address
         if (username.contains("@")) {
             return userRepository.findByEmail(username)
-                .map(userDtoBuilder::buildUserAuthDTO)
+                .map(userAssembler::toUserAuthDTO)
                 .orElseThrow(BizAssert.failSupplier("User is not found!"));
         }
         // If username is a phone number
         if (username.startsWith("+")) {
             return userRepository.findByPhone(username)
-                .map(userDtoBuilder::buildUserAuthDTO)
+                .map(userAssembler::toUserAuthDTO)
                 .orElseThrow(BizAssert.failSupplier("User is not found!"));
         }
         return userRepository.findByUsername(username)
-            .map(userDtoBuilder::buildUserAuthDTO)
+            .map(userAssembler::toUserAuthDTO)
             .orElseThrow(BizAssert.failSupplier("User is not found!"));
     }
 
@@ -106,7 +107,7 @@ public class UserService {
     public VerifySignupResultDTO verifySignup(VerifySignupCMD verifySignupCMD) {
         BizAssert.notNull(verifySignupCMD, "verifySignupCMD must not be null");
         String username = verifySignupCMD.getUsername();
-        BizAssert.hasLength(username, "username is required");
+        BizAssert.notEmpty(username, "username is required");
         if (username.contains("@")) {
             contactInfoValidator.validateEmail(username);
             BizAssert.isTrue(userRepository.findByEmail(username).isEmpty(), "email already exists");
@@ -126,7 +127,7 @@ public class UserService {
     public UserAuthDTO signup(SignupCMD signupCMD) {
         BizAssert.notNull(signupCMD, "signupCMD must not be null");
         String username = signupCMD.getUsername();
-        BizAssert.hasLength(username, "username must not be empty");
+        BizAssert.notEmpty(username, "username must not be empty");
         String displayName = signupCMD.getDisplayName();
         String password = signupCMD.getPassword();
         String code = signupCMD.getCode();
@@ -156,7 +157,7 @@ public class UserService {
         }
         User user = userBuilder.build();
         userRepository.create(user);
-        return userDtoBuilder.buildUserAuthDTO(user);
+        return userAssembler.toUserAuthDTO(user);
     }
 
     @Transactional(transactionManager = "accountTransactionManager")
@@ -187,7 +188,7 @@ public class UserService {
                 userRepository.create(newUser);
                 return newUser;
             });
-       return userDtoBuilder.buildUserAuthDTO(user);
+       return userAssembler.toUserAuthDTO(user);
     }
 
     @Transactional(transactionManager = "accountTransactionManager")
@@ -205,7 +206,7 @@ public class UserService {
                 userRepository.create(newUser);
                 return newUser;
             });
-        return userDtoBuilder.buildUserAuthDTO(user);
+        return userAssembler.toUserAuthDTO(user);
     }
 
     @Transactional(transactionManager = "accountTransactionManager")
@@ -218,7 +219,7 @@ public class UserService {
                 updateUserProfileCMD.getGender(),
                 updateUserProfileCMD.getLocation());
         userRepository.update(user);
-        return userDtoBuilder.buildUserDTO(user);
+        return userAssembler.toUserDTO(user);
     }
 
     @Transactional(transactionManager = "accountTransactionManager")
@@ -227,7 +228,7 @@ public class UserService {
         User user = getExistingUser(updateUserLocaleCMD.getUserId());
         user.updateLocale(updateUserLocaleCMD.getLocale());
         userRepository.update(user);
-        return userDtoBuilder.buildUserDTO(user);
+        return userAssembler.toUserDTO(user);
     }
 
     @Transactional(transactionManager = "accountTransactionManager")
@@ -274,7 +275,7 @@ public class UserService {
                 .ifPresent(BizAssert.failAction(CommonErrorCode.OCCUPIED, "The phone is occupied!"));
         user.updatePhone(phone);
         userRepository.update(user);
-        return userDtoBuilder.buildUserDTO(user);
+        return userAssembler.toUserDTO(user);
     }
 
     public void sendVerificationCodeForUpdateEmail(SendEmailVerificationCodeCMD sendEmailVerificationCodeCMD) {
@@ -303,7 +304,7 @@ public class UserService {
                 .ifPresent(BizAssert.failAction(CommonErrorCode.OCCUPIED, "The email address is occupied!"));
         user.updateEmail(email);
         userRepository.update(user);
-        return userDtoBuilder.buildUserDTO(user);
+        return userAssembler.toUserDTO(user);
     }
 
     private User getExistingUser(Long userId) {

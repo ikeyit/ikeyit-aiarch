@@ -13,7 +13,7 @@ public class DefaultPasswordValidator implements PasswordValidator {
 
     @Override
     public void validate(String password) throws BizException {
-        BizAssert.hasLength(password, "Password must not be empty");
+        BizAssert.notEmpty(password, "Password must not be empty");
         BizAssert.isTrue(REGEX.matcher(password).matches(), """
             Password must have at least 8 characters and contains at least one letter, at least one digit and at least one special character.
             """);

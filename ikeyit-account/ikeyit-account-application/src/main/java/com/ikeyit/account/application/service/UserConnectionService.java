@@ -1,5 +1,6 @@
 package com.ikeyit.account.application.service;
 
+import com.ikeyit.account.application.assembler.UserAssembler;
 import com.ikeyit.account.application.model.ConnectUserCMD;
 import com.ikeyit.account.application.model.UserAuthDTO;
 import com.ikeyit.account.domain.model.User;
@@ -20,14 +21,14 @@ public class UserConnectionService {
 
     private final UserConnectionRepository userConnectionRepository;
 
-    private final UserDtoBuilder userDtoBuilder;
+    private final UserAssembler userAssembler;
 
     public UserConnectionService(UserRepository userRepository,
                                  UserConnectionRepository userConnectionRepository,
-                                 UserDtoBuilder userDtoBuilder) {
+                                 UserAssembler userAssembler) {
         this.userRepository = userRepository;
         this.userConnectionRepository = userConnectionRepository;
-        this.userDtoBuilder = userDtoBuilder;
+        this.userAssembler = userAssembler;
     }
 
     public User loadUserByConnection(String providerId, String providerUserId) {
@@ -45,7 +46,7 @@ public class UserConnectionService {
             .findByProviderSub(connectUserCMD.getProvider(), connectUserCMD.getSub());
         if (userConnectionOpt.isPresent()) {
             return userRepository.findById(userConnectionOpt.get().getId())
-                .map(userDtoBuilder::buildUserAuthDTO)
+                .map(userAssembler::toUserAuthDTO)
                 .orElseThrow(BizAssert.failSupplier("User is not found!"));
         }
 
@@ -91,7 +92,7 @@ public class UserConnectionService {
             userConnectionBuilder.picture(connectUserCMD.getPicture());
         }
         userConnectionRepository.create(userConnectionBuilder.build());
-        return userDtoBuilder.buildUserAuthDTO(user);
+        return userAssembler.toUserAuthDTO(user);
     }
 
     private String getCurrentLocale() {

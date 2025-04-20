@@ -53,7 +53,7 @@ public class User extends BaseAggregateRoot<Long> {
         verified = builder.verified;
         roles = builder.roles;
         locale = builder.locale;
-        createdAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
+        createdAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         updatedAt = createdAt;
         addDomainEvent(() -> new UserCreatedEvent(this));
     }
@@ -111,7 +111,7 @@ public class User extends BaseAggregateRoot<Long> {
             changed = true;
         }
         if (changed) {
-            this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
+            this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
             addDomainEvent(new UserProfileUpdatedEvent(this));
         }
     }
@@ -124,7 +124,7 @@ public class User extends BaseAggregateRoot<Long> {
     public void updatePassword(String password) {
         BizAssert.notNull(password, "Password cannot be null");
         this.password = password;
-        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
+        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         addDomainEvent(new UserPasswordUpdatedEvent(this));
     }
 
@@ -140,7 +140,7 @@ public class User extends BaseAggregateRoot<Long> {
         }
         var previousPhone = this.phone;
         this.phone = phone;
-        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
+        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         addDomainEvent(new UserPhoneUpdatedEvent(this, previousPhone));
     }
 
@@ -157,7 +157,7 @@ public class User extends BaseAggregateRoot<Long> {
         }
         var previousEmail = this.email;
         this.email = email;
-        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
+        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         addDomainEvent(new UserEmailUpdatedEvent(this, previousEmail));
     }
 
@@ -169,7 +169,7 @@ public class User extends BaseAggregateRoot<Long> {
             return;
         }
         this.enabled = true;
-        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
+        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         addDomainEvent(new UserEnabledEvent(this));
     }
 
@@ -181,7 +181,7 @@ public class User extends BaseAggregateRoot<Long> {
             return;
         }
         this.verified = true;
-        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
+        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         addDomainEvent(new UserVerifiedEvent(this));
     }
 
@@ -196,7 +196,7 @@ public class User extends BaseAggregateRoot<Long> {
             return;
         }
         this.locale = locale;
-        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
+        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         addDomainEvent(new UserLocaleUpdatedEvent(this));
     }
 
@@ -382,7 +382,7 @@ public class User extends BaseAggregateRoot<Long> {
         }
 
         public Builder displayName(String val) {
-            BizAssert.hasLength(val, "displayName must not be empty");
+            BizAssert.notEmpty(val, "displayName must not be empty");
             displayName = val;
             return this;
         }
@@ -414,7 +414,7 @@ public class User extends BaseAggregateRoot<Long> {
             return this;
         }
         public Builder locale(String val) {
-            BizAssert.hasLength(val, "locale is required");
+            BizAssert.notEmpty(val, "locale is required");
             locale = val;
             return this;
         }

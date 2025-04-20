@@ -1,11 +1,12 @@
 package com.ikeyit.account.infrastructure.security;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.CredentialsContainer;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,7 +29,7 @@ public class UserPrincipal implements UserDetails, CredentialsContainer {
 
     private String phone;
 
-    private Set<? extends GrantedAuthority>  authorities;
+    private Set<String> roles;
 
     private boolean accountNonExpired = true;
 
@@ -44,7 +45,8 @@ public class UserPrincipal implements UserDetails, CredentialsContainer {
     }
 
     public UserPrincipal(Long id,
-                         String username, String password,
+                         String username,
+                         String password,
                          String displayName,
                          String avatar,
                          String locale,
@@ -63,9 +65,7 @@ public class UserPrincipal implements UserDetails, CredentialsContainer {
         this.locale = locale;
         this.email = email;
         this.phone = phone;
-        this.authorities = roles == null ? Set.of() : roles.stream()
-            .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-            .collect(Collectors.toUnmodifiableSet());
+        this.roles = roles;
         this.enabled = enabled;
         this.accountNonExpired = accountNonExpired;
         this.accountNonLocked = accountNonLocked;
@@ -77,8 +77,15 @@ public class UserPrincipal implements UserDetails, CredentialsContainer {
     }
 
     @Override
-    public Set<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+    @JsonIgnore
+    public Set<SimpleGrantedAuthority> getAuthorities() {
+        return roles == null ? Set.of() : roles.stream()
+            .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+            .collect(Collectors.toUnmodifiableSet());
+    }
+
+    public Set<String> getRoles() {
+        return roles;
     }
 
     @Override
@@ -153,5 +160,31 @@ public class UserPrincipal implements UserDetails, CredentialsContainer {
 
     public void eraseCredentials() {
         this.password = null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UserPrincipal principal = (UserPrincipal) o;
+        return accountNonExpired == principal.accountNonExpired && accountNonLocked == principal.accountNonLocked && credentialsNonExpired == principal.credentialsNonExpired && enabled == principal.enabled && Objects.equals(id, principal.id) && Objects.equals(password, principal.password) && Objects.equals(username, principal.username) && Objects.equals(displayName, principal.displayName) && Objects.equals(avatar, principal.avatar) && Objects.equals(email, principal.email) && Objects.equals(phone, principal.phone) && Objects.equals(roles, principal.roles) && Objects.equals(locale, principal.locale);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(id);
+        result = 31 * result + Objects.hashCode(password);
+        result = 31 * result + Objects.hashCode(username);
+        result = 31 * result + Objects.hashCode(displayName);
+        result = 31 * result + Objects.hashCode(avatar);
+        result = 31 * result + Objects.hashCode(email);
+        result = 31 * result + Objects.hashCode(phone);
+        result = 31 * result + Objects.hashCode(roles);
+        result = 31 * result + Boolean.hashCode(accountNonExpired);
+        result = 31 * result + Boolean.hashCode(accountNonLocked);
+        result = 31 * result + Boolean.hashCode(credentialsNonExpired);
+        result = 31 * result + Boolean.hashCode(enabled);
+        result = 31 * result + Objects.hashCode(locale);
+        return result;
     }
 }
