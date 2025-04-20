@@ -4,6 +4,6 @@ CREATE TABLE foo
     status     SMALLINT     NOT NULL,
     message    VARCHAR(255) NOT NULL,
     source     JSON,
-    created_at TIMESTAMPTZ(6) NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ(6) NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ(3) NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ(3) NOT NULL DEFAULT NOW()
 );

@@ -9,6 +9,7 @@ import com.ikeyit.foo.domain.model.Foo;
 import com.ikeyit.foo.domain.model.FooSource;
 import com.ikeyit.foo.domain.repository.FooRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -32,6 +33,8 @@ public class FooService {
         this.fooAssembler = fooAssembler;
     }
 
+    // AI-NOTE: Ensure the code uses the foo dedicated transactionManager
+    @Transactional(transactionManager = "fooTransactionManager")
     public FooDTO create(CreateFooCMD createFooCMD) {
         Foo foo = new Foo(createFooCMD.getMessage(), new FooSource("device1", "port1"));
         fooRepository.create(foo);

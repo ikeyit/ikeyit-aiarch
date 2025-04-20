@@ -40,7 +40,7 @@ public class DomainEventPublication {
      * @param listenerId The identifier of the listener that should process this event
      */
     public DomainEventPublication(DomainEvent event, String listenerId) {
-        this(event, listenerId, Instant.now().truncatedTo(ChronoUnit.MICROS));
+        this(event, listenerId, Instant.now().truncatedTo(ChronoUnit.MILLIS));
     }
 
     /**

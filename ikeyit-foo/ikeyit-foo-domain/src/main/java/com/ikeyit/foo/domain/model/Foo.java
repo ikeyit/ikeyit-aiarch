@@ -42,7 +42,7 @@ public class Foo extends BaseAggregateRoot<Long> {
         this.message = message;
         this.status = FooStatus.ACTIVE;
         this.source = source;
-        this.createdAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
+        this.createdAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         this.updatedAt = createdAt;
         // Generate a domain event to notify the domain model is created
         // Use lazy method to initialize a domain event, because the ID is not generated at the moment。
@@ -57,7 +57,7 @@ public class Foo extends BaseAggregateRoot<Long> {
      */
     public void changeMessage(String message) {
         this.message = message;
-        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
+        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         // Generate a domain event to notify it is updated
         addDomainEvent(new FooUpdatedEvent(this));
     }
