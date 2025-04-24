@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
 
 public class AuthTokenCookieRepository {
@@ -39,21 +40,25 @@ public class AuthTokenCookieRepository {
 
     public void saveCookie(String token, long maxAge, HttpServletRequest request, HttpServletResponse response) {
         log.debug("Save auth token cookie: {}", token);
-        Cookie cookie = new Cookie(this.cookieName, token);
-        cookie.setMaxAge((int) maxAge);
-        cookie.setPath("/");
-        cookie.setSecure(request.isSecure());
-        cookie.setHttpOnly(true);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from(this.cookieName, token)
+            .maxAge((int) maxAge)
+            .httpOnly(true)
+            .secure(request.isSecure())
+            .path("/")
+            .sameSite("None")
+            .build();
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 
     public void clearCookie(HttpServletRequest request, HttpServletResponse response) {
         log.debug("Clear auth token cookie");
-        Cookie cookie = new Cookie(this.cookieName, null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        cookie.setSecure(request.isSecure());
-        cookie.setHttpOnly(true);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from(this.cookieName, "")
+            .maxAge(0)
+            .httpOnly(true)
+            .secure(request.isSecure())
+            .path("/")
+            .sameSite("None")
+            .build();
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 }
