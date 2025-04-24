@@ -1,3 +1,4 @@
+
 logging:
   level:
     com.ikeyit: debug
@@ -31,6 +32,10 @@ spring:
       bucket: bucket name
       cdnUrl: your cdn url for s3 storage
   security:
+    account:
+      authsession:
+        # The secret is used to sign the JWT of auth session
+        secret: yourlonglonglonglonglonglonglonglonglonglonglongsecret
     oauth2:
       # Configure social login
       client:
@@ -49,52 +54,6 @@ spring:
         jwk-set-file: ${user.home}/ikeyit-config/ikeyit-allinone/jwks.json
         # Configure the clients. TODO Store the clients in database
         client:
-          store-web-client:
-            registration:
-              client-id: store-web-client
-              client-authentication-methods:
-                - none
-              authorization-grant-types:
-                - authorization_code
-                - refresh_token
-              redirect-uris:
-                - http://localhost:5173/callback
-              post-logout-redirect-uris:
-                - http://localhost:5173
-              scopes:
-                - openid
-                - profile
-                - email
-                - roles
-                - offline_access
-            token:
-              access-token-time-to-live: 60m
-              refresh-token-time-to-live: 360m
-              reuse-refresh-tokens: false
-            require-authorization-consent: false
-            require-proof-key: true
-          library-system:
-            registration:
-              client-id: library-system
-              client-secret: "{noop}library-system"
-              client-authentication-methods:
-                - client_secret_post
-              authorization-grant-types:
-                - authorization_code
-                - refresh_token
-              redirect-uris:
-                - http://localhost:3000/api/auth/callback/oidc
-              scopes:
-                - openid
-                - profile
-                - email
-                - roles
-            token:
-              access-token-time-to-live: 60m
-              refresh-token-time-to-live: 360m
-              reuse-refresh-tokens: false
-            require-authorization-consent: false
-            require-proof-key: true
           ikeyit-classroom-ios:
             registration:
               client-id: ikeyit-classroom-ios
@@ -104,9 +63,9 @@ spring:
                 - authorization_code
                 - refresh_token
               redirect-uris:
-                - com.ikeyit.Classroom:/oauth2redirect
+                - com.ikeyit.Classroom://oidc_callback
               post-logout-redirect-uris:
-                - com.ikeyit.Classroom:/oauth2logout
+                - com.ikeyit.Classroom://oidc_logout_callback
               scopes:
                 - openid
                 - profile
@@ -115,7 +74,100 @@ spring:
                 - offline_access
             token:
               access-token-time-to-live: 1m
-              refresh-token-time-to-live: 7d
+              refresh-token-time-to-live: 1d
+              reuse-refresh-tokens: false
+            require-authorization-consent: false
+            require-proof-key: true
+          ikeyit-classroom-web:
+            registration:
+              client-id: ikeyit-classroom-web
+              client-authentication-methods:
+                - none
+              authorization-grant-types:
+                - authorization_code
+              redirect-uris:
+                - https://classroom.dev.test:5174/oidc-callback
+                - https://classroom.dev.test:5174/silent-renew.html
+              post-logout-redirect-uris:
+                - https://classroom.dev.test:5174/oidc-logout-callback
+              scopes:
+                - openid
+                - profile
+                - email
+                - roles
+            token:
+              access-token-time-to-live: 5m
+              refresh-token-time-to-live: 12h
+              reuse-refresh-tokens: false
+            require-authorization-consent: false
+            require-proof-key: true
+          ikeyit-todo-web:
+            registration:
+              client-id: ikeyit-todo-web
+              client-authentication-methods:
+                - none
+              authorization-grant-types:
+                - authorization_code
+                - refresh_token
+              redirect-uris:
+                - https://todo.dev.test:5173/callback
+              post-logout-redirect-uris:
+                - https://todo.dev.test:5173/
+              scopes:
+                - openid
+                - profile
+                - email
+                - roles
+                - offline_access
+            token:
+              access-token-time-to-live: 60m
+              refresh-token-time-to-live: 360m
+              reuse-refresh-tokens: false
+            require-authorization-consent: false
+            require-proof-key: true
+          ikeyit-whatisthis-ios:
+            registration:
+              client-id: ikeyit-whatisthis-ios
+              client-authentication-methods:
+                - none
+              authorization-grant-types:
+                - authorization_code
+                - refresh_token
+              redirect-uris:
+                - com.ikeyit.WhatIsThis://oidc_callback
+              post-logout-redirect-uris:
+                - com.ikeyit.WhatIsThis://oidc_logout_callback
+              scopes:
+                - openid
+                - profile
+                - email
+                - roles
+                - offline_access
+            token:
+              access-token-time-to-live: 1m
+              refresh-token-time-to-live: 1d
+              reuse-refresh-tokens: false
+            require-authorization-consent: false
+            require-proof-key: true
+          admin-web:
+            registration:
+              client-id: admin-web
+              client-secret: "{noop}admin-web"
+              client-authentication-methods:
+                - client_secret_post
+              authorization-grant-types:
+                - authorization_code
+                - refresh_token
+              redirect-uris:
+                - http://admin.dev.test:5175/api/auth/callback/oidc
+              scopes:
+                - openid
+                - profile
+                - email
+                - roles
+            token:
+              access-token-time-to-live: 60m
+              refresh-token-time-to-live: 360m
               reuse-refresh-tokens: false
             require-authorization-consent: false
             require-proof-key: true
