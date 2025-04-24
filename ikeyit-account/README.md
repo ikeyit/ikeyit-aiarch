@@ -112,3 +112,7 @@ The `ikeyit-account-sdk` module provides client libraries for integrating with t
 
 REST API documentation is available in OpenAPI format at
 [ikeyit-account-openapi.yml](ikeyit-account-interfaces-api/ikeyit-account-openapi.yml)
+
+### How to Integrate
+
+[HOW_TO_INTEGRATE.md](HOW_TO_INTEGRATE.md)
