@@ -62,7 +62,7 @@ public class TeacherService {
         teacher.update(updateTeacherCMD.getName(), updateTeacherCMD.getFaculty(), updateTeacherCMD.getTitle());
         
         // Save teacher
-        teacherRepository.update(teacher);
+        teacherRepository.create(teacher);
         return classroomAssembler.toTeacherDTO(teacher);
     }
 

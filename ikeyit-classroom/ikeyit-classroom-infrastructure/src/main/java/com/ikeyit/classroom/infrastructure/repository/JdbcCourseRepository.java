@@ -31,7 +31,7 @@ public class JdbcCourseRepository implements CourseRepository {
         """;
 
     private static final String SQL_FIND_ALL = """
-        SELECT * FROM course
+        SELECT * FROM course ORDER BY id DESC
         """;
         
     private static final String SQL_FIND_BY_TEACHER_USER_ID = """

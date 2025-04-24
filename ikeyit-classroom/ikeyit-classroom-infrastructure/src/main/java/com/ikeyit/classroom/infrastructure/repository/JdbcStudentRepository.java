@@ -33,8 +33,8 @@ public class JdbcStudentRepository implements StudentRepository {
         SELECT * FROM student WHERE user_id = :userId
         """;
         
-    private static final String SQL_FIND_BY_STUDENT_ID = """
-        SELECT * FROM student WHERE student_id = :studentNo
+    private static final String SQL_FIND_BY_STUDENT_NO = """
+        SELECT * FROM student WHERE student_no = :studentNo
         """;
 
     private static final String SQL_UPDATE = """
@@ -88,6 +88,6 @@ public class JdbcStudentRepository implements StudentRepository {
 
     @Override
     public Optional<Student> findByStudentNo(String studentNo) {
-        return DataAccessUtils.optionalResult(jdbcTemplate.query(SQL_FIND_BY_STUDENT_ID, Map.of("studentNo", studentNo), rowMapper));
+        return DataAccessUtils.optionalResult(jdbcTemplate.query(SQL_FIND_BY_STUDENT_NO, Map.of("studentNo", studentNo), rowMapper));
     }
 }

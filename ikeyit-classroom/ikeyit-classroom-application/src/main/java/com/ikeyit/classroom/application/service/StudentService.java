@@ -47,7 +47,7 @@ public class StudentService {
                                     createStudentCMD.getFaculty(), createStudentCMD.getClassName(), 
                                     createStudentCMD.getUserId());
         // Save student
-        studentRepository.update(student);
+        studentRepository.create(student);
         return classroomAssembler.toStudentDTO(student);
     }
 

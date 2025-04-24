@@ -50,7 +50,7 @@ public class ClassScheduleService {
             cmd.getEndTime());
         
         // Save class schedule
-        classScheduleRepository.update(classSchedule);
+        classScheduleRepository.create(classSchedule);
         return classroomAssembler.toClassScheduleDTO(classSchedule);
     }
 

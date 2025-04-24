@@ -52,7 +52,8 @@ public class ClassroomAssembler {
         dto.setFaculty(student.getFaculty());
         dto.setClassName(student.getClassName());
         dto.setUserId(student.getUserId());
-
+        dto.setCreatedAt(student.getCreatedAt());
+        dto.setUpdatedAt(student.getUpdatedAt());
         return dto;
     }
 
@@ -74,7 +75,8 @@ public class ClassroomAssembler {
         dto.setFaculty(teacher.getFaculty());
         dto.setTitle(teacher.getTitle());
         dto.setUserId(teacher.getUserId());
-
+        dto.setCreatedAt(teacher.getCreatedAt());
+        dto.setUpdatedAt(teacher.getUpdatedAt());
         return dto;
     }
 
