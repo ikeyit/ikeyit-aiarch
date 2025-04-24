@@ -1,5 +1,7 @@
 server:
   shutdown: graceful
+  # for reverse proxy
+  forward-headers-strategy: framework
   servlet:
     encoding:
       charset: utf-8
