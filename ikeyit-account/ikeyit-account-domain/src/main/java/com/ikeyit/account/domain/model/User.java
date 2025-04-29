@@ -98,7 +98,7 @@ public class User extends BaseAggregateRoot<Long> {
             changed = true;
         }
         if (displayName != null && !displayName.equals(this.displayName)) {
-            BizAssert.isTrue(displayName.length() > 2, "Display name should have at least two characters");
+            BizAssert.isTrue(displayName.length() >= 2, "Display name should have at least two characters");
             this.displayName = displayName;
             changed = true;
         }
