@@ -11,11 +11,11 @@ public enum CommonErrorCode implements ErrorCode {
     /** Invalid argument or parameter value */
     INVALID_ARGUMENT,
 
-    /** Access to the resource is forbidden */
-    FORBIDDEN,
+    /** Authorization is required*/
+    AUTHORIZATION_REQUIRED,
 
-    /** Authentication is required to access the resource */
-    UNAUTHORIZED,
+    /** Authentication is required*/
+    AUTHENTICATION_REQUIRED,
 
     /** Requested resource was not found */
     NOT_FOUND,

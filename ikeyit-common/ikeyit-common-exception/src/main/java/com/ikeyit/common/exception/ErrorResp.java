@@ -7,4 +7,7 @@ package com.ikeyit.common.exception;
  * @param errMsg The error message
  */
 public record ErrorResp(String errCode, String errMsg) {
+    public ErrorResp(ErrorCode errCode, String errMsg) {
+        this(errCode.name(), errMsg);
+    }
 }

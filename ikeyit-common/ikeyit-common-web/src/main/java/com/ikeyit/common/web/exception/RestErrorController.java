@@ -101,7 +101,7 @@ public class RestErrorController extends AbstractErrorController {
         } else if (HttpStatus.FORBIDDEN == status) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ErrorRespBuilder
-                            .of(CommonErrorCode.FORBIDDEN)
+                            .of(CommonErrorCode.AUTHORIZATION_REQUIRED)
                             .setMessageSource(messageSource)
                             .setMessageKeyPrefix(MESSAGE_KEY_PREFIX)
                             .setMessageKey("forbidden")
@@ -111,7 +111,7 @@ public class RestErrorController extends AbstractErrorController {
         } else if (HttpStatus.UNAUTHORIZED == status) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorRespBuilder
-                            .of(CommonErrorCode.UNAUTHORIZED)
+                            .of(CommonErrorCode.AUTHENTICATION_REQUIRED)
                             .setMessageSource(messageSource)
                             .setMessageKeyPrefix(MESSAGE_KEY_PREFIX)
                             .setMessageKey("unauthorized")

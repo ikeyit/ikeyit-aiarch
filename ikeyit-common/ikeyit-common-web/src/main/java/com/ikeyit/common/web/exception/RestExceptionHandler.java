@@ -46,13 +46,13 @@ public class RestExceptionHandler {
         this.messageSource = messageSource;
     }
 
-    @ExceptionHandler(BizException.class)
     /**
      * Handles business logic exceptions and converts them to error responses.
      *
      * @param exception The business exception that was thrown
      * @return A ResponseEntity with BAD_REQUEST status and error details
      */
+    @ExceptionHandler(BizException.class)
     public ResponseEntity<ErrorResp> handleBizException(BizException exception){
         log.error("Error!", exception);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
