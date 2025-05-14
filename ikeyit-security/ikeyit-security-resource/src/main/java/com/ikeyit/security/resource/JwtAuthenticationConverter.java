@@ -28,7 +28,7 @@ public class JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthen
         authenticatedUser.setLocale(jwt.getClaimAsString(StandardClaimNames.LOCALE));
         Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
         // Set the granted authorities for the client
-        var clientScopes = jwt.getClaimAsStringList("scp");
+        var clientScopes = jwt.getClaimAsStringList("scope");
         if (clientScopes != null && !clientScopes.isEmpty()) {
             for (String scope : clientScopes)
                 grantedAuthorities.add(new SimpleGrantedAuthority("SCOPE_" + scope));

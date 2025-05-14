@@ -25,7 +25,7 @@ public class SecurityHolder {
     public static AuthenticatedUser authenticatedUserOrThrow() {
         AuthenticatedUser authenticatedUser = authenticatedUser();
         if (authenticatedUser == null) {
-            throw new IllegalArgumentException("Tenant context is not found!");
+            throw new IllegalArgumentException("Security context is not found!");
         }
         return authenticatedUser;
     }

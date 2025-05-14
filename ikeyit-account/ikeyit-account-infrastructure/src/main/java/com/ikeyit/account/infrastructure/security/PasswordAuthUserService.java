@@ -21,7 +21,7 @@ public class PasswordAuthUserService implements UserDetailsService {
     public UserPrincipal loadUserByUsername(String username) {
         var user = userService.loadUserAuth(username);
         if (!StringUtils.hasLength(user.getPassword())) {
-            throw new BizException(CommonErrorCode.FORBIDDEN, "It's not allowed to login with password");
+            throw new BizException(CommonErrorCode.AUTHORIZATION_REQUIRED, "It's not allowed to login with password");
         }
         return new UserPrincipal(
             user.getId(),

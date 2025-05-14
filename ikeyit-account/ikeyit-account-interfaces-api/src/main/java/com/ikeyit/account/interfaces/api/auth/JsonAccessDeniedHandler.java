@@ -27,6 +27,6 @@ public class JsonAccessDeniedHandler implements AccessDeniedHandler {
 
         response.setStatus(HttpStatus.FORBIDDEN.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        JsonUtils.mapper().writeValue(response.getWriter(), new ErrorResp(CommonErrorCode.FORBIDDEN.name(), "Not authorized!"));
+        JsonUtils.mapper().writeValue(response.getWriter(), new ErrorResp(CommonErrorCode.AUTHORIZATION_REQUIRED.name(), "Not authorized!"));
     }
 }

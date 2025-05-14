@@ -18,6 +18,6 @@ public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        JsonUtils.mapper().writeValue(response.getWriter(), new ErrorResp(CommonErrorCode.UNAUTHORIZED.name(), "Authentication is required!"));
+        JsonUtils.mapper().writeValue(response.getWriter(), new ErrorResp(CommonErrorCode.AUTHENTICATION_REQUIRED.name(), "Authentication is required!"));
     }
 }

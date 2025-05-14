@@ -19,6 +19,6 @@ public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         JsonUtils.mapper()
-            .writeValue(response.getWriter(), new ErrorResp(CommonErrorCode.FORBIDDEN.name(), "Authentication is required!"));
+            .writeValue(response.getWriter(), new ErrorResp(CommonErrorCode.AUTHORIZATION_REQUIRED.name(), "Authentication is required!"));
     }
 }
