@@ -1,0 +1,47 @@
+server:
+  shutdown: graceful
+  forward-headers-strategy: native
+  reactive:
+    session:
+      cookie:
+        name: adm_sid
+        http-only: true
+        same-site: Lax
+
+# enable actuator
+management:
+  security:
+    enabled: true
+  health:
+    livenessstate: # for K8S livenessProbe
+      enabled: true
+    readinessstate: # for K8S readinessProbe
+      enabled: true
+    show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+spring:
+  main:
+    banner-mode: off
+  application:
+    name: bff-web
+  session:
+    redis:
+      flush-mode: on_save
+      namespace: bff-web:session
+  profiles:
+    active: "dev"
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+resilience4j.timelimiter:
+  configs:
+    default:
+      timeoutDuration: 10s
