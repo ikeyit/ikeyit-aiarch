@@ -1,5 +1,8 @@
 package com.ikeyit.security.resource;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class AuthenticatedUser {
     private Long id;
 
@@ -10,6 +13,8 @@ public class AuthenticatedUser {
     private String avatar;
 
     private String locale;
+
+    private final Map<String, Object> attributes = new HashMap<>();
 
     public Long getId() {
         return id;
@@ -49,5 +54,13 @@ public class AuthenticatedUser {
 
     public void setLocale(String locale) {
         this.locale = locale;
+    }
+
+    public void setAttribute(String key, Object value) {
+        attributes.put(key, value);
+    }
+
+    public Object getAttribute(String key) {
+        return attributes.get(key);
     }
 }
