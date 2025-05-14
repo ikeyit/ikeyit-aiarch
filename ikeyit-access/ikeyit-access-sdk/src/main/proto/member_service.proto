@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package grpc.com.ikeyit.access;
+
+option java_package = "com.ikeyit.access.protobuf";
+option java_multiple_files = true;
+
+message UpdateMemberRolesRequest {
+  string realm_type = 1;
+  int64 realm_id = 2;
+  int64 user_id = 3;
+  repeated MemberRoleRequest roles = 4;
+  bool appended = 5;
+}
+
+
+message MemberRoleRequest {
+  int64 role_id = 1;
+  int32 role_type = 2;
+}
+
+message UpdateMemberRolesResponse {
+}
+
+
+message GrantSupremeRoleRequest {
+  string realm_type = 1;
+  int64 realm_id = 2;
+  int64 user_id = 3;
+}
+
+message GrantSupremeRoleResponse {
+  int64 role_id = 1;
+}
+
+service MemberService {
+  rpc updateRoles(UpdateMemberRolesRequest) returns (UpdateMemberRolesResponse);
+  rpc GrantSupremeRole(GrantSupremeRoleRequest) returns (GrantSupremeRoleResponse);
+}

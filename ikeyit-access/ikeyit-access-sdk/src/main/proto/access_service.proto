@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package grpc.com.ikeyit.access;
+
+option java_package = "com.ikeyit.access.protobuf";
+option java_multiple_files = true;
+
+message CheckAccessRequest {
+  int64 user_id = 1;
+  string permission = 2;
+  int64 realm_id = 3;
+  string realm_type = 4;
+}
+
+message CheckAccessResponse {
+  bool granted = 1;
+}
+
+message GetAuthoritiesRequest {
+  int64 user_id = 1;
+  int64 realm_id = 2;
+  string realm_type = 3;
+}
+message GetAuthoritiesResponse {
+  int64 member_id = 1;
+  string member_display_name = 2;
+  repeated string role = 3;
+  repeated string permission = 4;
+}
+
+
+service AccessService {
+  rpc Check(CheckAccessRequest) returns (CheckAccessResponse);
+  rpc GetAuthorities(GetAuthoritiesRequest) returns (GetAuthoritiesResponse);
+}

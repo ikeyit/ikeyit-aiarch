@@ -1,0 +1,13 @@
+rootProject.name = "ikeyit-access"
+include("ikeyit-access-domain")
+include("ikeyit-access-application")
+include("ikeyit-access-infrastructure")
+include("ikeyit-access-interfaces-admin-api")
+include("ikeyit-access-interfaces-grpc")
+include("ikeyit-access-interfaces-consumer")
+include("ikeyit-access-interfaces-job")
+include("ikeyit-access-interfaces-allinone")
+include("ikeyit-access-core")
+include("ikeyit-access-web")
+include("ikeyit-access-sdk")
+include("ikeyit-access-sdk-example")

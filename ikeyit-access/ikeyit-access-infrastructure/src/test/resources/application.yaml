@@ -1,0 +1,12 @@
+logging:
+  level:
+    org.springframework.transaction: debug
+    org.springframework.jdbc: debug
+    com.ikeyit: debug
+
+spring:
+  datasource:
+#    url: jdbc:mysql://mysql.ikeyit.dev:3306/ikeyit_access
+    url: jdbc:postgresql://pg.ikeyit.dev:5432/access?currentSchema=public&stringtype=unspecified
+    username: ikeyit
+    password: dev_pass
