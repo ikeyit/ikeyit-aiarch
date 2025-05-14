@@ -1,7 +1,6 @@
 package com.ikeyit.account.interfaces.api.auth.authorization;
 
 import com.ikeyit.account.infrastructure.security.UserPrincipal;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.oidc.StandardClaimNames;
 import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
@@ -10,11 +9,9 @@ import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Customize access token, id token, refresh token
@@ -63,11 +60,7 @@ public class TokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingContext
             claimsBuilder.claim(StandardClaimNames.NAME, userPrincipal.getDisplayName());
         }
         if (scopes.contains("roles")) {
-            List<String> roles = userPrincipal.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-            claimsBuilder.claim("roles", roles);
+            claimsBuilder.claim("roles", userPrincipal.getRoles());
         }
     }
 }

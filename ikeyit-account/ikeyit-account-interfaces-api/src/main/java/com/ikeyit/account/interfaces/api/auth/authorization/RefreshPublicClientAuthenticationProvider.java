@@ -25,6 +25,8 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.util.Assert;
 
+import java.util.Objects;
+
 /**
  * Enable refresh token for public clients.
  * Add the provider before the default PublicClientAuthenticationProvider
@@ -43,9 +45,10 @@ public final class RefreshPublicClientAuthenticationProvider implements Authenti
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 		OAuth2ClientAuthenticationToken clientAuthentication = (OAuth2ClientAuthenticationToken) authentication;
-		String grantType = clientAuthentication.getAdditionalParameters().get(OAuth2ParameterNames.GRANT_TYPE).toString();
 		if (!ClientAuthenticationMethod.NONE.equals(clientAuthentication.getClientAuthenticationMethod()) ||
-			!AuthorizationGrantType.REFRESH_TOKEN.getValue().equals(grantType)
+			!Objects.equals(AuthorizationGrantType.REFRESH_TOKEN.getValue(),
+				clientAuthentication.getAdditionalParameters().get(OAuth2ParameterNames.GRANT_TYPE)
+			)
 		) {
 			return null;
 		}
