@@ -1,8 +1,15 @@
-
 logging:
   level:
     com.ikeyit: debug
     org.springframework.security: debug
+
+grpc:
+  server:
+    port: 9100
+  client:
+    access-service-grpc:
+      address: 'dns:///localhost:9100'
+
 spring:
   config:
     # Create your application.yml in the following folder to overwrite the properties
@@ -15,6 +22,18 @@ spring:
       password: dev_pass
     classroom:
       url: jdbc:postgresql://postgresql-server:5432/classroom?currentSchema=public&stringtype=unspecified
+      username: ikeyit
+      password: dev_pass
+    access:
+      url: jdbc:postgresql://postgresql-server:5432/access?currentSchema=public&stringtype=unspecified
+      username: ikeyit
+      password: dev_pass
+    access-global:
+      url: jdbc:postgresql://postgresql-server:5432/access?currentSchema=public&stringtype=unspecified
+      username: ikeyit
+      password: dev_pass
+    access-event-retry:
+      url: jdbc:postgresql://postgresql-server:5432/access?currentSchema=public&stringtype=unspecified
       username: ikeyit
       password: dev_pass
   data:
@@ -149,28 +168,29 @@ spring:
               reuse-refresh-tokens: false
             require-authorization-consent: false
             require-proof-key: true
-          admin-web:
+          web-client:
             registration:
-              client-id: admin-web
-              client-secret: "{noop}admin-web"
+              client-id: web-client
+              client-secret: "{noop}secret"
               client-authentication-methods:
                 - client_secret_post
               authorization-grant-types:
                 - authorization_code
                 - refresh_token
               redirect-uris:
-                - http://admin.dev.test:5175/api/auth/callback/oidc
+                - http://localhost:8081/auth/oauth2/code/account
+                - http://localhost:6112/auth/oauth2/code/account
+              post-logout-redirect-uris:
+                - http://localhost:8081/login
+                - http://localhost:6112/login
               scopes:
                 - openid
                 - profile
-                - email
                 - roles
             token:
-              access-token-time-to-live: 60m
-              refresh-token-time-to-live: 360m
-              reuse-refresh-tokens: false
+              accessTokenTimeToLive: 5m
+              refreshTokenTimeToLive: 360m
             require-authorization-consent: false
-            require-proof-key: true
       resourceserver:
         jwt:
 #          jwk-set-uri: real authorization server jwks endpoint
